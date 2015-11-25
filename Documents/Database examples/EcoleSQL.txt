@@ -1,0 +1,10 @@
+DROP TABLE `Ecole`;
+
+CREATE TABLE `Ecole` (
+  `id` mediumint(8) unsigned NOT NULL auto_increment,
+  `IDEcole` mediumint,
+  `Nom` varchar(255),
+  PRIMARY KEY (`id`)
+) AUTO_INCREMENT=1;
+
+INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (1,"Non Magna Consulting"),(2,"Curae; Inc."),(3,"Ultrices Inc."),(4,"Cum Sociis Natoque Ltd"),(5,"Eu Neque Pellentesque Industries"),(6,"Dapibus LLC"),(7,"Ut Inc."),(8,"Cras Associates"),(9,"Porttitor Eros Consulting"),(10,"Gravida Aliquam Consulting");

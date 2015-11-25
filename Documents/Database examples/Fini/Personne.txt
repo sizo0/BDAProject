@@ -1,0 +1,14 @@
+DROP TABLE `Personne`;
+
+CREATE TABLE `Personne` (
+  `id` mediumint(8) unsigned NOT NULL auto_increment,
+  `Prenom` varchar(255) default NULL,
+  `Nom` varchar(255) default NULL,
+  `IDFormation` mediumint default NULL,
+  `IDEcole` mediumint default NULL,
+  PRIMARY KEY (`id`)
+  FOREIGN KEY (`IDEcole`) REFERENCES Ecole(`IDEcole`)
+  FOREIGN KEY (`IDFormation`) REFERENCES Formation(`IDFormation`)
+) AUTO_INCREMENT=1;
+
+INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Aspen","Vega",10,1),("Quemby","Juarez",2,10),("Yeo","Macias",3,1),("Salvador","Barnett",7,4),("Mollie","Duke",3,5),("Madeline","Lawson",1,6),("Tanner","Moran",1,7),("Demetria","Welch",10,8),("Miriam","Pearson",6,9),("Hayfa","Franks",2,10);

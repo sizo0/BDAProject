@@ -1,0 +1,12 @@
+DROP TABLE `Formation`;
+
+CREATE TABLE `Formation` (
+  `id` mediumint(8) unsigned NOT NULL auto_increment,
+  `IDFormation` mediumint,
+  `Nom` varchar(255),
+  `IDEcole` mediumint default NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`IDEcole`) REFERENCES Ecole(`IDEcole`)
+) AUTO_INCREMENT=1;
+
+INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (1,"Eu Tellus Industries",10),(2,"Urna Foundation",10),(3,"Condimentum LLC",1),(4,"Imperdiet Ornare In Industries",7),(5,"Ac Orci Ut Foundation",3),(6,"Auctor Inc.",1),(7,"Dignissim Lacus Aliquam Inc.",1),(8,"Consequat Incorporated",10),(9,"Ipsum Nunc Id Industries",6),(10,"Ac Turpis Incorporated",2);

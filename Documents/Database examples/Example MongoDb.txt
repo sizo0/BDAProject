@@ -1,0 +1,10 @@
+{"address": {"IDEcole": "1", "nom": "Non Magna Consulting"}
+{"address": {"IDEcole": "2", "nom": "Curae; Inc."}
+{"address": {"IDEcole": "3", "nom": "Ultrices Inc."}
+{"address": {"IDEcole": "4", "nom": "Cum Sociis Natoque Ltd"}
+{"address": {"IDEcole": "5", "nom": "Eu Neque Pellentesque Industries"}
+{"address": {"IDEcole": "6", "nom": "Dapibus LLC"}
+{"address": {"IDEcole": "7", "nom": "Ut Inc."}
+{"address": {"IDEcole": "8", "nom": "Cras Associates"}
+{"address": {"IDEcole": "9", "nom": "Porttitor Eros Consulting"}
+{"address": {"IDEcole": "10", "nom": "Gravida Aliquam Consulting"}
