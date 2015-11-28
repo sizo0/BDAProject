@@ -46,9 +46,16 @@ mongoimport --db test --collection restaurants --drop --file primer-dataset.json
 Select data: select grade in restaurants database
 db.restaurants.find({},{grade: 1})
 
+SQL
+CREATE DATABASE database_name;
+USE database_name;
 
+connection avec mysql -u root
+sans Password
+Ma configuration est faite avec Wamp
+Apparemment je n'ai pas de password
 
-
+mysql -u root  < bat file dans le cmd
 
 
 
