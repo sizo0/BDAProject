@@ -1,32 +1,3 @@
-Génération des fichiers de base de données:
-http://www.generatedata.com/?lang=fr
-
-Base de données:
-Personne :- Nom Prenom IDFormation
-Formation :- IDFormation Nom (entreprises) IDEcole (entre 1 et 10)
-Ecole :- IDEcole Nom (random nom) IDFormation (entre 1 et 10)
-
-La génération totalement aléatoire n'est pas possible.
-Une personne ayant une formation doit fréquenter une des écoles référencées par la formation en question.
-Donc le fichier personne a du être retapé.
-
-importer une base de données sous MYSQL
-mysql -h host -u user -ppass base_de_donnees < fichier_dump
-    host représente le nom ou l'adresse IP de la machine sur laquelle la base de données que vous désirez exporter est installée. Par défaut il s'agit de localhost, c'est-à-dire la machine à partir de laquelle la commande mysql est lancée
-    user représente l'utilisateur avec lequel vous désirez vous connecter. Par défaut il s'agit de l'utilisateur root
-    password représente le mot de passe de l'utilisateur avec lequel vous désirez vous connecter. Si vous n'indiquez pas de mot de passe, celui-ci sera demandé de manière interactive. Il ne doit pas y avoir d'espace entre -p et le mot de passe fourni
-    base_de_donnees est le nom de la base de données à exporter.
-    fichier est le nom du fichier dans lequel la base va être exportée. Si aucun chemin absolu n'est précisé, le fichier sera stocké dans le même répertoire que la commande mysql. 
-
-Importer une base de données sous Mongodb
-mongoimport --db test --collection restaurants --drop --file primer-dataset.json
-In the system shell or command prompt, use mongoimport to insert the documents into the restaurants collection in the test database. If the collection already exists in the test database, the operation will drop the restaurants collection first.
-
-Le fichier de données doit comporter une extension json.
-
-Pour démarrer Mysql: taper dans le cmd Mysql
-Pour démarrer MongoDB: lancer 2 cmd et taper mongod et mongo dans un cmd admin
-
 Pour ouvrir une nouvelle fenêtre cmd: start
 
 MongoDB
@@ -40,87 +11,35 @@ Insertion
 db.acteurs.find() 
 Afficher les acteurs
 
-import file: use this line in CMD
-mongoimport --db test --collection restaurants --drop --file primer-dataset.json
+
 
 Select data: select grade in restaurants database
 db.restaurants.find({},{grade: 1})
 
+Mongodb
+démarrer mongodb
+ouvrir le cmd, run mongod, ouvrir une autre fenêtre et run mongo
+import file
+mongoimport --db test --collection restaurants --drop --file EcoleMongoDB.txt
+utiliser une base de données (créée ou déjà existente)
+use test
+effacer une base de données
+use test db.dropDatabase()
+effacer une collection
+db.collection.drop()
+montrer les collections
+show collections
+sortir
+exit
+
+
 SQL
 CREATE DATABASE database_name;
 USE database_name;
-
 connection avec mysql -u root
 sans Password
 Ma configuration est faite avec Wamp
 Apparemment je n'ai pas de password
-
 mysql -u root  < bat file dans le cmd
-
-
-
-Fichiers complets:
-DROP TABLE `Personne`;
-
-CREATE TABLE `Personne` (
-  `id` mediumint(8) unsigned NOT NULL auto_increment,
-  `Prenom` varchar(255) default NULL,
-  `Nom` varchar(255) default NULL,
-  `IDFormation` mediumint default NULL,
-  `IDEcole` mediumint default NULL,
-  PRIMARY KEY (`id`)
-) AUTO_INCREMENT=1;
-
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Aspen","Vega",9,5),("Quemby","Juarez",7,8),("Yeo","Macias",1,7),("Salvador","Barnett",6,9),("Mollie","Duke",5,4),("Madeline","Lawson",5,8),("Tanner","Moran",9,7),("Demetria","Welch",5,9),("Miriam","Pearson",7,6),("Hayfa","Franks",5,8);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Isaac","Juarez",7,3),("Clio","Martinez",4,3),("Maile","Cain",7,5),("Marah","Hess",1,2),("Amos","Nash",10,10),("Solomon","Hodges",1,8),("Jared","Durham",8,4),("Harriet","Aguilar",8,10),("Sheila","Harvey",5,4),("Solomon","Fry",1,7);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Candace","Knapp",8,6),("Howard","Mccoy",5,10),("Jerry","Levy",7,10),("Jasmine","Luna",10,9),("Quemby","Hays",1,7),("Andrew","Odonnell",8,5),("Ian","Davidson",9,6),("Rowan","Sears",10,3),("Davis","Navarro",8,1),("Zachary","Franklin",8,8);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Julie","Mcgowan",1,2),("Roary","Koch",9,5),("Kirestin","Wiley",5,8),("Kennedy","Waters",6,5),("Nichole","Velazquez",3,4),("Maggie","Cannon",7,10),("Olga","Newman",2,4),("Cassidy","Joyner",1,4),("Hedda","Holmes",5,2),("Fredericka","Moss",7,10);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Lacota","Deleon",6,10),("Silas","Hines",3,9),("Savannah","Maxwell",8,8),("Roth","Lott",3,10),("Leonard","Stanley",4,10),("Kiara","Payne",10,10),("Shea","Carney",1,1),("Hillary","Jackson",3,2),("Unity","Colon",6,2),("Hannah","King",7,3);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Alan","Knox",2,6),("Abra","Melton",3,4),("Tanek","Lynch",6,2),("Larissa","Fowler",5,6),("Erica","Nixon",10,2),("Desiree","Ashley",1,3),("Ariel","Rodgers",9,1),("Halee","Haney",2,7),("Amos","Griffith",5,1),("Geoffrey","Klein",5,2);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Alvin","Huff",6,7),("Noel","Mayer",2,2),("Brett","Salinas",9,8),("Mercedes","Cantrell",3,3),("Wylie","French",4,2),("Vincent","Patrick",6,3),("Nelle","Horne",3,3),("Adrienne","Crawford",10,5),("Hayes","Moore",4,4),("Darrel","Wright",6,2);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Addison","Lester",6,2),("Celeste","Vance",3,1),("Hammett","Austin",4,8),("Lucius","Buckley",10,7),("Norman","Thomas",4,5),("Jaquelyn","Herring",7,7),("Ann","Valencia",5,5),("Aphrodite","Lane",8,5),("Bernard","Rosa",10,3),("Alexis","White",2,6);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Kelsey","Stuart",3,4),("Camille","Rowland",9,3),("Graham","Pugh",4,2),("Harlan","Richardson",2,9),("Kevyn","Burks",8,10),("Ivana","Burt",6,6),("Gareth","Lott",6,3),("Chancellor","Ochoa",2,8),("Winter","Kinney",2,4),("Leandra","Hoffman",2,3);
-INSERT INTO `Personne` (`Prenom`,`Nom`,`IDFormation`,`IDEcole`) VALUES ("Sean","Gaines",7,10),("Kuame","Conner",7,7),("Rhona","Buck",10,5),("Ashely","Combs",4,6),("Hedley","Glover",8,5),("Jameson","Bush",3,7),("Ramona","Johnston",7,3),("Libby","Colon",10,5),("Alfreda","Tyler",4,7),("Myles","French",2,10);
-
-
-DROP TABLE `Formation`;
-
-CREATE TABLE `Formation` (
-  `id` mediumint(8) unsigned NOT NULL auto_increment,
-  `IDFormation` mediumint,
-  `Nom` varchar(255),
-  `IDEcole` mediumint default NULL,
-  PRIMARY KEY (`id`)
-) AUTO_INCREMENT=1;
-
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (1,"Eu Tellus Industries",10),(2,"Urna Foundation",8),(3,"Condimentum LLC",1),(4,"Imperdiet Ornare In Industries",7),(5,"Ac Orci Ut Foundation",3),(6,"Auctor Inc.",1),(7,"Dignissim Lacus Aliquam Inc.",1),(8,"Consequat Incorporated",10),(9,"Ipsum Nunc Id Industries",6),(10,"Ac Turpis Incorporated",2);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (11,"Tempus Scelerisque Lorem Ltd",6),(12,"Vitae Semper Egestas Associates",8),(13,"Etiam Vestibulum Corporation",3),(14,"Suspendisse Ltd",3),(15,"Curabitur LLP",2),(16,"Etiam Incorporated",7),(17,"Sed Industries",2),(18,"Etiam Imperdiet Consulting",5),(19,"Dictum Foundation",4),(20,"Non Vestibulum Inc.",3);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (21,"Sit Incorporated",9),(22,"Diam Proin Consulting",9),(23,"Sit Amet Lorem Limited",6),(24,"Eu Lacus Quisque LLC",9),(25,"Lacus LLC",3),(26,"Pulvinar Arcu Et Inc.",3),(27,"Lorem Ut Aliquam Foundation",10),(28,"Placerat Velit Industries",5),(29,"Vestibulum Lorem Institute",6),(30,"Tellus Lorem Eu Industries",9);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (31,"Eu Metus Company",5),(32,"Arcu Eu Odio LLC",6),(33,"Est Mauris Corporation",3),(34,"Pharetra LLC",4),(35,"Adipiscing Corporation",8),(36,"Odio Corporation",3),(37,"Semper Dui Ltd",10),(38,"Vivamus Nibh Inc.",8),(39,"Mauris Sagittis Placerat Consulting",7),(40,"Imperdiet Ornare Industries",5);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (41,"Mi LLC",1),(42,"At Ltd",3),(43,"Tincidunt Congue Incorporated",3),(44,"Pellentesque Company",10),(45,"Erat Industries",7),(46,"Ante Foundation",1),(47,"Laoreet Libero Industries",5),(48,"In Associates",4),(49,"Posuere Vulputate Consulting",8),(50,"Curabitur Massa PC",4);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (51,"Dui Cras Ltd",8),(52,"Odio Associates",2),(53,"Aliquet Metus Consulting",7),(54,"Malesuada Fringilla Industries",6),(55,"Magna Suspendisse Tristique LLC",3),(56,"Ut Corp.",4),(57,"Nunc Foundation",3),(58,"Donec Inc.",5),(59,"Justo Ltd",7),(60,"Turpis Nulla Consulting",6);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (61,"Tristique Company",8),(62,"Diam Luctus LLC",5),(63,"Malesuada Vel Corporation",4),(64,"Interdum Libero Dui Inc.",8),(65,"Integer Company",9),(66,"Mattis PC",1),(67,"Dui Semper Limited",3),(68,"Vestibulum Incorporated",8),(69,"Tortor At Ltd",9),(70,"Odio Corp.",5);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (71,"Magnis Dis Parturient Incorporated",9),(72,"Id Nunc Interdum Associates",6),(73,"Nibh Inc.",6),(74,"Risus Donec Foundation",8),(75,"Arcu Et Industries",7),(76,"Erat Neque Non Institute",3),(77,"Nulla Incorporated",4),(78,"Aliquet Nec Incorporated",1),(79,"Erat Limited",10),(80,"Curae; Donec Industries",8);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (81,"Lobortis PC",10),(82,"Mollis Industries",1),(83,"Purus Ltd",3),(84,"Vulputate LLP",10),(85,"Morbi Quis PC",4),(86,"Aliquet Libero Integer Institute",1),(87,"Arcu Vestibulum Ante Industries",9),(88,"Risus A Ultricies LLC",7),(89,"Luctus LLC",7),(90,"Arcu Imperdiet PC",2);
-INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (91,"Facilisis Eget Company",6),(92,"Suspendisse Incorporated",8),(93,"Parturient Montes Inc.",7),(94,"Vitae Dolor Limited",8),(95,"Dolor Corp.",9),(96,"Nec Limited",10),(97,"Semper Tellus Id Incorporated",1),(98,"Aliquam Associates",6),(99,"Volutpat Nunc Consulting",5),(100,"Fusce Aliquam Enim Limited",3);
-
-
-DROP TABLE `Ecole`;
-
-CREATE TABLE `Ecole` (
-  `id` mediumint(8) unsigned NOT NULL auto_increment,
-  `IDEcole` mediumint,
-  `Nom` varchar(255),
-  PRIMARY KEY (`id`)
-) AUTO_INCREMENT=1;
-
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (1,"Non Magna Consulting"),(2,"Curae; Inc."),(3,"Ultrices Inc."),(4,"Cum Sociis Natoque Ltd"),(5,"Eu Neque Pellentesque Industries"),(6,"Dapibus LLC"),(7,"Ut Inc."),(8,"Cras Associates"),(9,"Porttitor Eros Consulting"),(10,"Gravida Aliquam Consulting");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (11,"Amet Metus LLP"),(12,"Commodo LLC"),(13,"Vivamus Industries"),(14,"Mauris Corp."),(15,"Tincidunt Corp."),(16,"Proin LLC"),(17,"Dolor Dapibus Gravida LLP"),(18,"Aliquam Industries"),(19,"Duis Ac LLP"),(20,"Rutrum Ltd");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (21,"In LLP"),(22,"Ipsum Dolor Sit Inc."),(23,"Nulla Semper Tellus Associates"),(24,"Enim Industries"),(25,"A Dui Inc."),(26,"Lacus Cras Interdum Foundation"),(27,"Laoreet Lectus Corp."),(28,"Risus In Mi Inc."),(29,"Semper Et Institute"),(30,"Varius Company");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (31,"Facilisis Facilisis Magna Associates"),(32,"Dictum Ultricies LLP"),(33,"Lorem LLC"),(34,"Duis Gravida Praesent Consulting"),(35,"Quis Diam Company"),(36,"Aliquet Metus Urna Incorporated"),(37,"Velit Consulting"),(38,"Lectus Inc."),(39,"Vel Arcu Corp."),(40,"At Corporation");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (41,"Eu Euismod Ac Corp."),(42,"Semper Foundation"),(43,"Leo Ltd"),(44,"At Incorporated"),(45,"Eu Foundation"),(46,"Auctor Non Feugiat Ltd"),(47,"Amet Dapibus Incorporated"),(48,"Aliquet Sem Ut Incorporated"),(49,"Quam A Felis Incorporated"),(50,"Dictum Eleifend Nunc Incorporated");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (51,"Ullamcorper PC"),(52,"Lorem Company"),(53,"Netus Et Malesuada Incorporated"),(54,"Interdum Institute"),(55,"Aliquam Tincidunt Nunc Incorporated"),(56,"A Malesuada Corp."),(57,"Tincidunt Tempus Risus Inc."),(58,"Erat Etiam Vestibulum Associates"),(59,"Egestas A Dui Incorporated"),(60,"Fringilla Corp.");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (61,"Diam At Pretium Ltd"),(62,"Tortor Nibh Corp."),(63,"Pharetra Ut Pharetra Inc."),(64,"Ut Sagittis Lobortis Institute"),(65,"Sodales Corporation"),(66,"Convallis Dolor Quisque Incorporated"),(67,"Congue Turpis LLP"),(68,"Euismod Consulting"),(69,"Nibh Associates"),(70,"Ut Ltd");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (71,"Accumsan Laoreet Ipsum Company"),(72,"Arcu Aliquam PC"),(73,"Nunc Commodo Corporation"),(74,"Convallis Ante Ltd"),(75,"Eu Associates"),(76,"Laoreet Posuere Foundation"),(77,"Nec Industries"),(78,"Morbi Tristique Senectus Consulting"),(79,"Imperdiet LLP"),(80,"Sed Eu Eros Associates");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (81,"Ut Lacus LLP"),(82,"Aliquet Odio Etiam PC"),(83,"Augue Ut Lacus LLC"),(84,"Suspendisse Ac Metus Corp."),(85,"Gravida Non Limited"),(86,"Et Magna Praesent LLP"),(87,"A Mi Company"),(88,"Mauris Molestie Pharetra Corporation"),(89,"Enim Commodo Hendrerit PC"),(90,"Amet PC");
-INSERT INTO `Ecole` (`IDEcole`,`Nom`) VALUES (91,"Donec Nibh Enim Incorporated"),(92,"At LLC"),(93,"Elit PC"),(94,"Lorem Industries"),(95,"Lorem Ac Risus Ltd"),(96,"Odio Corporation"),(97,"Massa Corporation"),(98,"Nec Corp."),(99,"Consectetuer Adipiscing Corporation"),(100,"Non Corporation");
+sortir
+\q

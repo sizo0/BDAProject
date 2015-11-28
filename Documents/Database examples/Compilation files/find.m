@@ -1,0 +1,1 @@
+db.EcoleMongoDB.find().forEach(printjson);

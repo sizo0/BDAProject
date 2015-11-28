@@ -1,6 +1,5 @@
 package DatabasesManager;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 
 /* Documentation rapide du package:
@@ -18,43 +17,62 @@ import java.util.HashMap;
  * L'output de la fonction est un String contenant le resultat de la requête.
  * Le format est souvent moche
  * 
- * Problèmes possibles
+ * Problèmes possibles et restrictions
  * mysql et mongo ne sont pas dans la variable système path
  * mysql: root account has a password
+ * à chaque saut de ligne pour Mongo, une commande est lancée. Ne pas couper les requêtes avec des sauts de lignes
+ * Les tests dans le main de la classe DatabaseManager testent la partie MongoDB et la partie SQL. Il n'y a pas de test sur les
+ * retours des fonctions au cas où les fichiers d'entrée sont mauvais.
+ * Auteur: Dan Seeruttun
  */
 
-public class DatabasesManager {
+public class DatabaseManager {
 
 	static HashMap<Integer,String> data;
 	static MySQLManager mysql;
 	static MongoManager mongo;
 	
-	public DatabasesManager() throws IOException{
+	public DatabaseManager() throws IOException{
+		//getting data from configuration file
 		System.out.println("Init mySQL databases");
 		System.out.println("Get configuration from databasesFiles.properties");
-		getData();
-		System.out.println(data);
+		this.getData();
 		
+		//setting up for SQL
 		System.out.println("Init SQLManager");
 		mysql = new MySQLManager(data.get(0), data.get(1));
 		System.out.println("Init SQL databases files");
 		mysql.initConnection();
 
-		//MySQLManager mongo = new MongoManager(data.get(0), data.get(2));
-		
+		//setting up for mongo
+		System.out.println("Init MongoManager");
+		mongo = new MongoManager(data.get(0), data.get(2));
+		System.out.println("Init Mongo databases files");
+		mongo.initConnection();
 	}
 	
 	public String sendSQLDatabaseRequest(String request) throws IOException{
 		return mysql.sendMYSQLRequest(request);
 	}
+	
+	public String sendMongoRequest(String request) throws IOException{
+		return mongo.sendMongoRequest(request);
+	}
 
-	public static void getData() throws IOException{
+	public void getData() throws IOException{
 		PathHandler properties = new PathHandler();
 		data = properties.getPropValues();
 	}
 	
+	public void clear() throws IOException{
+		mysql.clear();
+		mongo.clear();
+	}
+	
 	public static void main(String[] args) throws IOException {
-		DatabasesManager dbM = new DatabasesManager();
-		System.out.println(dbM.sendSQLDatabaseRequest("select * from Liaison"));
+		DatabaseManager dbM = new DatabaseManager();
+		System.out.println(dbM.sendSQLDatabaseRequest("select * from Liaison;"));
+		System.out.println(dbM.sendMongoRequest("db.EcoleMongoDB.find()"));
+		dbM.clear();
 	}
 }
