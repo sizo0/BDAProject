@@ -1,0 +1,13 @@
+use y;
+DROP TABLE IF EXISTS Formation;
+CREATE TABLE Formation
+(
+IDFormation mediumint(8)  unsigned NOT NULL,
+Nom varchar(255),
+PRIMARY KEY (IDFormation)
+);
+
+INSERT INTO `Formation` (`IDFormation`,`Nom`) VALUES (1,"Eu Tellus Industries"),(2,"Urna Foundation"),(3,"Condimentum LLC"),(4,"Imperdiet Ornare In Industries"),(5,"Ac Orci Ut Foundation"),(6,"Auctor Inc."),(7,"Dignissim Lacus Aliquam Inc."),(8,"Consequat Incorporated"),(9,"Ipsum Nunc Id Industries"),(10,"Ac Turpis Incorporated");
+
+select * from Formation;
+

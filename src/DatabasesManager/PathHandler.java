@@ -68,6 +68,8 @@ public class PathHandler {
 			int type2 = Integer.parseInt(prop.getProperty("type2"));
 			String file3 = prop.getProperty("file3");
 			int type3 = Integer.parseInt(prop.getProperty("type3"));
+			String file4 = prop.getProperty("file4");
+			int type4 = Integer.parseInt(prop.getProperty("type4"));
  
 			//Check the files
 			File f = new File(DBPath + File.separator + file1);
@@ -95,13 +97,26 @@ public class PathHandler {
 			if(f.exists() && !f.isDirectory()) { 
 				if (list.containsKey(type3)){
 					String s = list.get(type3) + SEPARATOR;
-					list.put(type2,s + file3);
+					list.put(type3,s + file3);
 				} else {
-					list.put(type2,file3);
+					list.put(type3,file3);
 				}
 				System.out.println(file3 + " successfully added");
 			} else {
 				System.out.println(file3 + " is not found");
+			}
+			
+			f = new File(DBPath + File.separator + file4);
+			if(f.exists() && !f.isDirectory()) { 
+				if (list.containsKey(type3)){
+					String s = list.get(type3) + SEPARATOR;
+					list.put(type4,s + file4);
+				} else {
+					list.put(type4,file4);
+				}
+				System.out.println(file4 + " successfully added");
+			} else {
+				System.out.println(file4 + " is not found");
 			}
 		} catch (Exception e) {
 			System.out.println("Exception: " + e);
