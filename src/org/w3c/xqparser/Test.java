@@ -203,8 +203,8 @@ public class Test {
 								fis)
 								: new InputStreamReader(fis, encoding);
 						XPath parser = new XPath(isr);
-						SimpleNode tree = parser.XPath2();
-						dump(tree, dumpFormat);
+//						SimpleNode tree = parser.XPath2();
+//						dump(tree, dumpFormat);
 					} else if (args[argsStart].endsWith(".xquery")) {
 						if (dumpFormat != DUMP_XQUERYX)
 							System.out.println("Running test for: "
@@ -224,8 +224,8 @@ public class Test {
 								fis)
 								: new InputStreamReader(fis, encoding);
 						XPath parser = new XPath(isr);
-						SimpleNode tree = parser.XPath2();
-						dump(tree, dumpFormat);
+//						SimpleNode tree = parser.XPath2();
+//						dump(tree, dumpFormat);
 					} else if ("-catalog".equalsIgnoreCase(args[argsStart])) {
 						argsStart++;
 						numberArgsLeft--;
@@ -242,8 +242,8 @@ public class Test {
 						numberArgsLeft--;
 						Reader reader = new StringReader(args[argsStart]);
 						XPath parser = new XPath(reader);
-						SimpleNode tree = parser.XPath2();
-						dump(tree, dumpFormat);
+//						SimpleNode tree = parser.XPath2();
+//						dump(tree, dumpFormat);
 						break;
 					} else {
 						DocumentBuilderFactory dbf = DocumentBuilderFactory
@@ -286,8 +286,8 @@ public class Test {
 								}
 								XPath parser = new XPath(new StringReader(
 										xpathString));
-								SimpleNode tree = parser.XPath2();
-								dump(tree, dumpFormat);
+//								SimpleNode tree = parser.XPath2();
+//								dump(tree, dumpFormat);
 							}
 						}
 						System.out.println();
@@ -417,7 +417,7 @@ public class Test {
 							: new InputStreamReader(fis, encoding);
 
 					XPath parser = new XPath(isr);
-					SimpleNode tree = parser.XPath2();
+//					SimpleNode tree = parser.XPath2();
 					if (isParseError) {
 						failedErrorList.addElement(fileString);
 						System.out.print("x");
@@ -429,17 +429,17 @@ public class Test {
 						xqout2 = new PrintStream(new FileOutputStream(
 								XQueryXOutputFilename));
 						xqout1 = null;
-						boolean isValid = processToXQueryXAndValidate(tree,
-								null);
-						System.out.print(isValid ? "v" : "i");
-						if (!isValid) {
-							filesNotXQueryXValid.addElement(file
-									.getCanonicalPath());
-							if (filesNotXQueryXValid.size() > 5) {
-								hadEnough = true;
-								break; // from loop!
-							}
-						}
+//						boolean isValid = processToXQueryXAndValidate(tree,
+//								null);
+//						System.out.print(isValid ? "v" : "i");
+//						if (!isValid) {
+//							filesNotXQueryXValid.addElement(file
+//									.getCanonicalPath());
+//							if (filesNotXQueryXValid.size() > 5) {
+//								hadEnough = true;
+//								break; // from loop!
+//							}
+//						}
 					}
 					// System.out.println("ok");
 					// dump(tree, dumpFormat);

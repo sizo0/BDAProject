@@ -33,9 +33,9 @@ public class ParseBAL implements java.awt.event.ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (whichButton == 0)
-            _myApplet.button1_action(e);
-        else
-            _myApplet.button2_action(e);
+//        if (whichButton == 0)
+//            _myApplet.button1_action(e);
+//        else
+//            _myApplet.button2_action(e);
     }
 }

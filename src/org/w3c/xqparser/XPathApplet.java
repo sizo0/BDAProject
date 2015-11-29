@@ -15,6 +15,9 @@ apply.
  */
 package org.w3c.xqparser;
 
+import org.jooq.Record;
+import org.jooq.SelectSelectStep;
+
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -107,62 +110,62 @@ public class XPathApplet extends Applet {
 		return null;
 	}
 
-	void button1_action(ActionEvent evt) {
-
-		try {
-			String expr = textArea1.getText();
-			XPath parser = new XPath(new java.io.StringBufferInputStream(expr));
-			SimpleNode tree = parser.XPath2();
-			if (null == tree)
-				textArea2.setText("Error!");
-			else {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream(
-						62 * 1024);
-				PrintStream ps = new PrintStream(baos);
-				tree.dump("|", ps);
-				String s = new String(baos.toByteArray());
-				textArea2.setText(s);
-			}
-		} catch (ParseException e) {
-			textArea2.setText(e.getMessage());
-		} catch (Error err) {
-			textArea2.setText(err.getMessage());
-		} catch (PostParseException ppe) {
-			textArea2.setText(ppe.getMessage());
-		} catch (Exception genericException) {
-			textArea2.setText(genericException.getMessage());
-		}
-	}
-
-	void button2_action(ActionEvent evt) {
-
-		try {
-			String expr = textArea1.getText();
-			XPath parser = new XPath(new java.io.StringBufferInputStream(expr));
-			SimpleNode tree = parser.XPath2();
-			if (null == tree)
-				textArea2.setText("Error!");
-			else {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream(
-						62 * 1024);
-				PrintStream ps = new PrintStream(baos);
-				XQueryToXQueryX trans = new XQueryToXQueryX();
-				trans.transformNoEncodingException(tree, null, ps);
-				String s = new String(baos.toByteArray());
-				textArea2.setText(s);
-			}
-		} catch (ParseException e) {
-			textArea2.setText(e.getMessage());
-		} catch (Error err) {
-			textArea2.setText(err.getMessage());
-		} catch (UnsupportedEncodingException e) {
-			textArea2.setText(e.getMessage());
-		} catch (PostParseException ppe) {
-			textArea2.setText(ppe.getMessage());
-		} catch (Exception genericException) {
-			textArea2.setText(genericException.getMessage());
-		}
-
-	}
+//	void button1_action(ActionEvent evt) {
+//
+//		try {
+//			String expr = textArea1.getText();
+//			XPath parser = new XPath(new java.io.StringBufferInputStream(expr));
+//			SelectSelectStep<Record> query = parser.XPath2();
+//			if (null == query)
+//				textArea2.setText("Error!");
+//			else {
+//				ByteArrayOutputStream baos = new ByteArrayOutputStream(
+//						62 * 1024);
+//				PrintStream ps = new PrintStream(baos);
+//				System.out.println(query.getSQL());
+//				String s = new String(baos.toByteArray());
+//				textArea2.setText(s);
+//			}
+//		} catch (ParseException e) {
+//			textArea2.setText(e.getMessage());
+//		} catch (Error err) {
+//			textArea2.setText(err.getMessage());
+//		} catch (PostParseException ppe) {
+//			textArea2.setText(ppe.getMessage());
+//		} catch (Exception genericException) {
+//			textArea2.setText(genericException.getMessage());
+//		}
+//	}
+//
+//	void button2_action(ActionEvent evt) {
+//
+//		try {
+//			String expr = textArea1.getText();
+//			XPath parser = new XPath(new java.io.StringBufferInputStream(expr));
+//			SelectSelectStep<Record> query = parser.XPath2();
+//			if (null == query)
+//				textArea2.setText("Error!");
+//			else {
+//				ByteArrayOutputStream baos = new ByteArrayOutputStream(
+//						62 * 1024);
+//				PrintStream ps = new PrintStream(baos);
+//				XQueryToXQueryX trans = new XQueryToXQueryX();
+//				trans.transformNoEncodingException(query, null, ps);
+//				String s = new String(baos.toByteArray());
+//				textArea2.setText(s);
+//			}
+//		} catch (ParseException e) {
+//			textArea2.setText(e.getMessage());
+//		} catch (Error err) {
+//			textArea2.setText(err.getMessage());
+//		} catch (UnsupportedEncodingException e) {
+//			textArea2.setText(e.getMessage());
+//		} catch (PostParseException ppe) {
+//			textArea2.setText(ppe.getMessage());
+//		} catch (Exception genericException) {
+//			textArea2.setText(genericException.getMessage());
+//		}
+//
+//	}
 
 }

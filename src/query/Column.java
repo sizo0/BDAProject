@@ -11,4 +11,9 @@ public class Column {
         this.prefix = prefix;
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return prefix + "." + name;
+    }
 }

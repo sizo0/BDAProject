@@ -1,15 +1,18 @@
 package sql;
 
+import org.jooq.Record;
+import org.jooq.SelectSelectStep;
+
 import java.util.ArrayList;
 import java.util.List;
+import static org.jooq.impl.DSL.*;
 
 public class DB {
-	public DB INSTANCE = new DB();
+	public static final DB INSTANCE = new DB();
 	List<Table> tables;
-	
-	
+
 	private DB() {
-		tables = new ArrayList<Table>();
+		tables = new ArrayList<>();
 		Table personnes = new Table("Personnes");
 		Table formations = new Table("Formations");
 		Table ecoles = new Table("Ecoles");
@@ -35,5 +38,15 @@ public class DB {
 		
 		tables.add(personnes);
 		tables.add(formations);
+	}
+
+	public SelectSelectStep<Record> queryFromTablesAndColumns(SelectSelectStep<Record> query, List<String> tablesOrColumns) {
+		// TODO
+		tables.forEach(table -> {
+			if (tablesOrColumns.get(tablesOrColumns.size() - 1).equals(table.getName())) {
+
+			}
+		});
+		return query;
 	}
 }

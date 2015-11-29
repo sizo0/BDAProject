@@ -9,11 +9,19 @@ public class Table {
 	
 	public Table(String name) {
 		this.name = name;
-		columns = new ArrayList();
+		columns = new ArrayList<>();
 	}
 	
 	public Table add(Column c) {
 		columns.add(c);
 		return this;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public List<Column> getColumns() {
+		return columns;
 	}
 }
