@@ -9,12 +9,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MongoManager {
+public class MongoDBManager {
 
 	static String path;
 	static ArrayList<String> files;
 	
-	public MongoManager(String path0, String files0){
+	public MongoDBManager(String path0, String files0){
 		path = path0;
 		files = new ArrayList<String>();
 		String[] temp = files0.split(PathHandler.SEPARATOR);

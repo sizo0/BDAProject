@@ -32,7 +32,7 @@ public class DatabaseManager {
 
 	static HashMap<Integer,String> data;
 	static MySQLManager mysql;
-	static MongoManager mongo;
+	static MongoDBManager mongo;
 	
 	public DatabaseManager() throws IOException{
 		//getting data from configuration file
@@ -48,7 +48,7 @@ public class DatabaseManager {
 
 		//setting up for mongo
 		System.out.println("Init MongoManager");
-		mongo = new MongoManager(data.get(0), data.get(2));
+		mongo = new MongoDBManager(data.get(0), data.get(2));
 		System.out.println("Init Mongo databases files");
 		mongo.initConnection();
 	}
