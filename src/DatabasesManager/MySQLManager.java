@@ -37,11 +37,11 @@ public class MySQLManager {
 		sendMYSQLRequest("drop database y");
 		System.out.println("MYSQL databases cleared");
 	}
-	public String sendMYSQLRequest(String request) throws IOException{
+	public String[][] sendMYSQLRequest(String request) throws IOException{
 		return this.sendMYSQLRequest("MySQLRequest.m",request);
 	}
 	
-	public String sendMYSQLRequest(String file,String request) throws IOException{
+	public String[][] sendMYSQLRequest(String file,String request) throws IOException{
 		{
 			String result = "";
 			//formating command
@@ -87,13 +87,47 @@ public class MySQLManager {
 	        			System.out.println("Delete operation is failed.");
 	        		} }
                 System.out.println("End of request"); 
-                return result;
+                return parseSQLResult(result);
 
 			} catch (IOException e) {e.printStackTrace();}
             catch(InterruptedException e2) {System.out.println("Fail to launch mysql command");} 
-			return "Error";}
+			return null;}
         }
 	
+	private String[][] parseSQLResult(String result) {
+		// TODO Auto-generated method stub
+		String[] temp = result.split("\n");
+		String[] temp0 = temp[0].split("\t");
+		int nbLignes = temp.length;
+		int nbAttributs = temp0.length;
+		String[][] tab = new String[nbLignes][nbAttributs];
+		String[] tempTab = new String[nbAttributs];
+		//init attributs
+		for (int i = 0 ; i < temp0.length ; i++){
+			tab[0][i] = temp0[i];
+			//System.out.println("1 " + temp0[i]);
+		}
+		//init données
+		for (int i = 1 ; i < temp.length ; i++){
+			String[] temp1 = temp[i].split("\t");
+			for (int j = 0 ; j < temp1.length ; j++){
+				tab[i][j] = temp1[j];
+				//System.out.println(i + " " + temp1[j]);
+			}
+		}
+		return tab;
+	}
+	
+	public static ArrayList<String> cloneList(ArrayList<String> list) {
+		ArrayList<String> clone = new ArrayList<String>(list.size());
+	    for(String item: list){
+	    	clone.add(item);
+	    }
+	    return clone;
+	}
+	
+	
+
 	public static String initMySQLTable(String file) throws IOException{
 		try {
 			String result = "";

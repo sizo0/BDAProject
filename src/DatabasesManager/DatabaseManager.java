@@ -51,7 +51,7 @@ public class DatabaseManager {
 		mongo.initConnection();
 	}
 	
-	public String sendSQLDatabaseRequest(String request) throws IOException{
+	public String[][] sendSQLDatabaseRequest(String request) throws IOException{
 		return mysql.sendMYSQLRequest(request);
 	}
 	
@@ -69,9 +69,21 @@ public class DatabaseManager {
 		mongo.clear();
 	}
 	
+	public void print2DimTableInConsole(String[][] tab)
+	{
+	   for(int i = 0; i < tab.length; i++)
+	   {
+	      for(int j = 0; j < tab[i].length; j++)
+	      {
+	         System.out.print(tab[i][j] + " ");
+	      }
+	      System.out.println();
+	   }
+	}
+	
 	public static void main(String[] args) throws IOException {
 		DatabaseManager dbM = new DatabaseManager();
-		System.out.println(dbM.sendSQLDatabaseRequest("select * from Liaison;"));
+		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne;"));
 		System.out.println(dbM.sendMongoRequest("db.EcoleMongoDB.find()"));
 		dbM.clear();
 	}
