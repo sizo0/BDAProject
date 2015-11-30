@@ -1654,9 +1654,11 @@ void ForClause()  :
   try {
 /*@egen*/
   "for" "$" VarName() "in" ExprSingle() {
-  isDocument = false;afterDocument=false;System.out.println(tablesOrColumns);
+  isDocument = false;afterDocument=false;
+  System.out.println(document);
+  System.out.println(tablesOrColumns);
   // todo retrieve tables and columns from tablesOrColumns using sql package and begin making query
-  query = DB.INSTANCE.queryFromTablesAndColumns(query, tablesOrColumns);
+  query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
   } (// todo join
   "," "$" VarName() "in" ExprSingle())*/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
@@ -3675,7 +3677,7 @@ void Literal()        :
 {}
 {
   (NumericLiteral() | <StringLiteral>{
-  if (isDocument) document = token.toString();
+  if (isDocument) { document = token.toString(); document=document.substring(1, document.length() - 1); }
   }/*@bgen(jjtree) #StringLiteral( true) */
                                      {
                                        SimpleNode jjtn001 = new SimpleNode(this, JJTSTRINGLITERAL);

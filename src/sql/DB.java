@@ -40,7 +40,7 @@ public class DB {
 		tables.add(formations);
 	}
 
-	public SelectSelectStep<Record> queryFromTablesAndColumns(SelectSelectStep<Record> query, List<String> tablesOrColumns) {
+	public SelectSelectStep<Record> queryFromTablesAndColumns(SelectSelectStep<Record> query, String document, List<String> tablesOrColumns) {
 		// TODO
 		tables.forEach(table -> {
 			if (tablesOrColumns.get(tablesOrColumns.size() - 1).equals(table.getName())) {
