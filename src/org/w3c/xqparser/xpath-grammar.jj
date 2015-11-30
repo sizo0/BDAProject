@@ -12,6 +12,8 @@
 
 package org.w3c.xqparser;
 
+import org.jooq.conf.ParamType;
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectSelectStep;
 import org.w3c.xqparser.Node;
@@ -31,6 +33,7 @@ import org.w3c.dom.traversal.NodeIterator;
 import org.w3c.dom.traversal.TreeWalker;
 import static org.jooq.impl.DSL.*;
 import sql.DB;
+import query.*;
 
 public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bgen(jjtree)*/
   protected JJTXPathState jjtree = new JJTXPathState();
@@ -40,8 +43,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
     SelectSelectStep<Record> query = select();
     String document;
     List<String> tablesOrColumns = new ArrayList<String>();
+    List<Where> wheres = new ArrayList<Where>();
+    List<String> expressions = new ArrayList<String>();
+    Where currentWhere;
+    Condition queryWhere;
     boolean isDocument = false;
     boolean afterDocument = false;
+    boolean isWhere = false;
       boolean m_isMatchPattern = false;
       boolean isStep = false;
 
@@ -1758,7 +1766,19 @@ void WhereClause()  :
 {/*@bgen(jjtree) WhereClause */
   try {
 /*@egen*/
+{
+    currentWhere = new Where();
+    isWhere = true;
+}
   "where" ExprSingle()/*@bgen(jjtree)*/
+  {
+    wheres.add(currentWhere);
+    isWhere = false;
+    System.out.println(wheres);
+    System.out.println(expressions);
+    queryWhere = DB.INSTANCE.queryWhere(wheres, expressions);
+    System.out.println(select(field("BOOK.TITLE")).from(table("cda")).where(queryWhere).getSQL(ParamType.INLINED));
+  }
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -2127,6 +2147,11 @@ void OrExpr()              :
   try {
 /*@egen*/
   AndExpr() ("or"{
+                if (isWhere) {
+                    expressions.add("or");
+                    wheres.add(currentWhere);
+                    currentWhere = new Where();
+                }
 				binaryTokenStack.push(token);
 			} AndExpr()/*@bgen(jjtree) #OrExpr( 2) */
                 {
@@ -2191,6 +2216,11 @@ void AndExpr()               :
   try {
 /*@egen*/
   ComparisonExpr() ("and"{
+                if (isWhere) {
+                    expressions.add("and");
+                    wheres.add(currentWhere);
+                    currentWhere = new Where();
+                }
 				binaryTokenStack.push(token);
 			} ComparisonExpr()/*@bgen(jjtree) #AndExpr( 2) */
                 {
@@ -2851,8 +2881,10 @@ void GeneralComp()        :
 {}
 {
   ("="{
+                currentWhere.setOperator("=");
 				binaryTokenStack.push(token);
 			} | "!="{
+                currentWhere.setOperator("!=");
 				binaryTokenStack.push(token);
 			} | <LessThanOpOrTagO>
 					{/* Careful! */ token_source.SwitchTo(DEFAULT); token_source.stateStack.pop(); }
@@ -2860,10 +2892,13 @@ void GeneralComp()        :
 		        
          {binaryTokenStack.push(token);}
 			 | "<="{
+                currentWhere.setOperator("<=");
 				binaryTokenStack.push(token);
 			} | ">"{
+                currentWhere.setOperator(">");
 				binaryTokenStack.push(token);
 			} | ">="{
+                currentWhere.setOperator(">=");
 				binaryTokenStack.push(token);
 			})
 }
@@ -3678,6 +3713,7 @@ void Literal()        :
 {
   (NumericLiteral() | <StringLiteral>{
   if (isDocument) { document = token.toString(); document=document.substring(1, document.length() - 1); }
+  if (isWhere) { currentWhere.setValue(token.toString()); }
   }/*@bgen(jjtree) #StringLiteral( true) */
                                      {
                                        SimpleNode jjtn001 = new SimpleNode(this, JJTSTRINGLITERAL);
@@ -3702,7 +3738,9 @@ void Literal()        :
 void NumericLiteral()        :
 {}
 {
-  (<IntegerLiteral>/*@bgen(jjtree) #IntegerLiteral( true) */
+  (<IntegerLiteral>{
+    if (isWhere) currentWhere.setValue(token.toString());
+  }/*@bgen(jjtree) #IntegerLiteral( true) */
                    {
                      SimpleNode jjtn001 = new SimpleNode(this, JJTINTEGERLITERAL);
                      boolean jjtc001 = true;
@@ -6530,7 +6568,10 @@ void QName()  :
 {/*@bgen(jjtree) QName */
   try {
 /*@egen*/
-  (FunctionQName() {if (afterDocument) tablesOrColumns.add(token.toString());} | "attribute"/*@bgen(jjtree)*/
+  (FunctionQName() {
+  if (afterDocument) tablesOrColumns.add(token.toString());
+  if (isWhere && isStep) currentWhere.setColumn(new Column(token.toString()));
+  } | "attribute"/*@bgen(jjtree)*/
                                 {
                                   jjtree.closeNodeScope(jjtn000, true);
                                   jjtc000 = false;
