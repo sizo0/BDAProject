@@ -17,7 +17,7 @@ public class MongoDBManager {
 	public MongoDBManager(String path0, String files0){
 		path = path0;
 		files = new ArrayList<String>();
-		String[] temp = files0.split(PathHandler.SEPARATOR);
+		String[] temp = files0.split(PropertiesHandler.SEPARATOR);
 		for (int i = 0 ; i < temp.length ; i++){
 			files.add(temp[i]);
 		}
@@ -87,6 +87,7 @@ public class MongoDBManager {
 	}
 	
 	public String[][] sendMongoRequest(String request) throws IOException{
+		System.out.println("Executing Query :" + request);
 			return sendMongoRequest("Mongo.m",request);
 	}
 	

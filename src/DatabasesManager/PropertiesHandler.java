@@ -11,7 +11,7 @@ import java.util.Properties;
  * 
  */
  
-public class PathHandler {
+public class PropertiesHandler {
 	String result = "";
 	InputStream inputStream;
 	 final static int PATHCST = 0;
@@ -25,7 +25,7 @@ public class PathHandler {
 		try {
 			Properties prop = new Properties();
 			String path = "DatabasesManager/";
-			String propFileName = path + "databasesFiles.properties";
+			String propFileName = path + "databaseFiles.properties";
  
 			inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
  

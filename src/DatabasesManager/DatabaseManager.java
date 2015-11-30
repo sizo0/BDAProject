@@ -62,7 +62,7 @@ public class DatabaseManager {
 	}
 
 	public void getData() throws IOException{
-		PathHandler properties = new PathHandler();
+		PropertiesHandler properties = new PropertiesHandler();
 		data = properties.getPropValues();
 	}
 	
