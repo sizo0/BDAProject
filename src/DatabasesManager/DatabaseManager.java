@@ -15,7 +15,9 @@ import java.util.HashMap;
  * Regarder lignes de printées en cas de problème
  * utiliser sendSQLDatabaseRequest pour envoyer une requête SQL.
  * L'output de la fonction est un String contenant le resultat de la requête.
- * Le format est souvent moche
+ * Les requêtes rendent des tableaux de tableaux de String
+ * La première ligne contient les types
+ * Les lignes suivantes contiennent les données
  * 
  * Problèmes possibles et restrictions
  * mysql et mongo ne sont pas dans la variable système path
@@ -55,7 +57,7 @@ public class DatabaseManager {
 		return mysql.sendMYSQLRequest(request);
 	}
 	
-	public String sendMongoRequest(String request) throws IOException{
+	public String[][] sendMongoRequest(String request) throws IOException{
 		return mongo.sendMongoRequest(request);
 	}
 
@@ -83,8 +85,8 @@ public class DatabaseManager {
 	
 	public static void main(String[] args) throws IOException {
 		DatabaseManager dbM = new DatabaseManager();
-		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne;"));
-		System.out.println(dbM.sendMongoRequest("db.EcoleMongoDB.find()"));
+		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where prenom = Juarez;"));
+		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find()"));
 		dbM.clear();
 	}
 }
