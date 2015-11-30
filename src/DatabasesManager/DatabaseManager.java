@@ -73,6 +73,10 @@ public class DatabaseManager {
 	
 	public void print2DimTableInConsole(String[][] tab)
 	{
+		if (tab == null){
+			System.out.println("No answer");
+			return;
+		}
 	   for(int i = 0; i < tab.length; i++)
 	   {
 	      for(int j = 0; j < tab[i].length; j++)
@@ -85,8 +89,8 @@ public class DatabaseManager {
 	
 	public static void main(String[] args) throws IOException {
 		DatabaseManager dbM = new DatabaseManager();
-		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where prenom = Juarez;"));
-		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find()"));
+		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where Prenom = \"Aspen\";"));
+		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));
 		dbM.clear();
 	}
 }

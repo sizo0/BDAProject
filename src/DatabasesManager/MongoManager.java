@@ -142,10 +142,14 @@ public class MongoManager {
 		}
 	
 	private String[][] parseMongoResult(String result) {
+		//System.out.println(result);
 			String[] temp = result.split("\\{");
+			if (temp.length <= 1){
+				return null;
+			}
 			String[] temp1 = temp[1].split("\"");
 			//temp[0] est le message de MongoDB
-			int nbLignes = temp.length - 1;
+			int nbLignes = temp.length;
 			int nbAttributs = temp1.length/4;
 			String[][] tab = new String[nbLignes][nbAttributs];
 			int cpt = 0;
