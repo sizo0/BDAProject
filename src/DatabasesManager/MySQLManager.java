@@ -27,7 +27,7 @@ public class MySQLManager {
 	}
 	
 	public void initConnection() throws IOException{
-		this.sendMYSQLRequest("create database y;");
+		this.sendMYSQLRequest("create database " + PropertiesHandler.NomSQL1 + ";");
 		//enter/create the database
 		for (String s : files){
 			this.initMySQLTable("Databases" + File.separator + s);
@@ -37,7 +37,7 @@ public class MySQLManager {
 	
 	public void clear() throws IOException{
 		sendMYSQLRequest("drop database " + PropertiesHandler.NomSQL1);
-		System.out.println("MYSQL databases cleared");
+		System.out.println("MYSQL database " + PropertiesHandler.NomSQL1 + " cleared");
 	}
 	public String[][] sendMYSQLRequest(String request) throws IOException{
 		System.out.println("Executing Query :" + request);
@@ -51,7 +51,7 @@ public class MySQLManager {
 			try {
 				String content = "";
 				if (!request.equals("create database " + PropertiesHandler.NomSQL1 + ";")){
-					content += "use y;\n";
+					content += "use " + PropertiesHandler.NomSQL1  + ";\n";
 				}
 				 content += request;
 				boolean remove = false;

@@ -77,8 +77,8 @@ public class PropertiesHandler {
 			NomMongo1 = prop.getProperty("NomMongo1");
 			String CleanFiles = prop.getProperty("Clean");
 			Clean = Boolean.parseBoolean(CleanFiles);
-			String DeleteCompFile = prop.getProperty("DeleteCompFile");
-			CompileFile = Boolean.parseBoolean(DeleteCompFile);
+			String KeepCompFile = prop.getProperty("DeleteCompFile");
+			CompileFile = Boolean.parseBoolean(KeepCompFile);
 			
 			//Check the files
 			File f = new File(DBPath + File.separator + file1);

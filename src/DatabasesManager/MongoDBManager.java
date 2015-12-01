@@ -53,7 +53,7 @@ public class MongoDBManager {
 				String[] temp = s.split("\\.");
 				Process p=Runtime.getRuntime().exec("mongo --eval db." + temp[0] + ".drop()"); 
 			}
-			System.out.println("Mongo databases cleared");
+			System.out.println("Mongo database " + PropertiesHandler.NomMongo1 + " cleared");
         }
 		catch(IOException e1) {System.out.println("clear for Mongo NOK " + e1);} 
 			
@@ -69,7 +69,7 @@ public class MongoDBManager {
 			Process p=Runtime.getRuntime().exec("mongo --eval db." + temp[0] + ".drop()"); 
             p.waitFor(); 
 			//send the request
-            p=Runtime.getRuntime().exec("mongoimport --db test --collection " + temp[0] + " --drop --file  Databases\\" + file); 
+            p=Runtime.getRuntime().exec("mongoimport --db " + PropertiesHandler.NomMongo1 +  " --collection " + temp[0] + " --drop --file  Databases\\" + file); 
             p.waitFor(); 
             BufferedReader reader=new BufferedReader(
                 new InputStreamReader(p.getInputStream())
@@ -116,7 +116,7 @@ public class MongoDBManager {
 			System.out.println("Compilation file in Mongo command created");
 			
 			//sending command
-			Process p=Runtime.getRuntime().exec("cmd /C mongo test "+ file); 
+			Process p=Runtime.getRuntime().exec("cmd /C mongo " + PropertiesHandler.NomMongo1 + " " + file); 
             p.waitFor(); 
             BufferedReader reader=new BufferedReader(
                 new InputStreamReader(p.getInputStream())

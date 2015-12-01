@@ -18,6 +18,7 @@ import java.util.HashMap;
  * Les requêtes rendent des tableaux de tableaux de String
  * La première ligne contient les types
  * Les lignes suivantes contiennent les données
+ * L'Interface graphique doit appeler les méthodes de la classe Main.
  * 
  * Problèmes possibles et restrictions
  * mysql et mongo ne sont pas dans la variable système path
@@ -93,6 +94,7 @@ public class DatabaseManager {
 		DatabaseManager dbM = new DatabaseManager();
 		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where Prenom = \"Aspen\";"));
 		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));
-		dbM.clear();
+		dbM.clear(); 
+		//L'interface doit appeler Clear quand l'application se ferme pour permettre le nettoyage de base de données
 	}
 }
