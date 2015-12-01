@@ -20,6 +20,8 @@ public class PropertiesHandler {
 	 final static String SEPARATOR = "&&&";
 	 static Boolean CompileFile;
 	 static Boolean Clean;
+	 static String NomSQL1;
+	 static String NomMongo1;
 	
 	public HashMap<Integer,String> getPropValues() throws IOException {
 		HashMap<Integer,String> list = new HashMap<Integer,String>();
@@ -71,8 +73,8 @@ public class PropertiesHandler {
 			
 			//get the user properties
 			//TODO
-			String NomSQL1 = prop.getProperty("NomSQL1");
-			String NomMongo1 = prop.getProperty("NomMongo1");
+			NomSQL1 = prop.getProperty("NomSQL1");
+			NomMongo1 = prop.getProperty("NomMongo1");
 			String CleanFiles = prop.getProperty("Clean");
 			Clean = Boolean.parseBoolean(CleanFiles);
 			String DeleteCompFile = prop.getProperty("DeleteCompFile");

@@ -3,8 +3,10 @@ package DatabasesManager;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -34,7 +36,7 @@ public class MySQLManager {
 	
 	
 	public void clear() throws IOException{
-		sendMYSQLRequest("drop database y");
+		sendMYSQLRequest("drop database " + PropertiesHandler.NomSQL1);
 		System.out.println("MYSQL databases cleared");
 	}
 	public String[][] sendMYSQLRequest(String request) throws IOException{
@@ -48,7 +50,7 @@ public class MySQLManager {
 			//formating command
 			try {
 				String content = "";
-				if (!request.equals("create database y;")){
+				if (!request.equals("create database " + PropertiesHandler.NomSQL1 + ";")){
 					content += "use y;\n";
 				}
 				 content += request;
@@ -129,27 +131,22 @@ public class MySQLManager {
 	
 	
 
-	public static String initMySQLTable(String file) throws IOException{
+	public String initMySQLTable(String file) throws IOException{
 		try {
-			String result = "";
-
-			System.out.println("Compilation file in MYSQL command created");
-			//sending command
-			Process p=Runtime.getRuntime().exec("cmd /C mysql -u root < "+ file); 
-            p.waitFor(); 
-            BufferedReader reader=new BufferedReader(
-                new InputStreamReader(p.getInputStream())
-            ); 
-            String line; 
-            while((line = reader.readLine()) != null) 
-            { 
-                result += line +  "\n";
-            } 
-            System.out.println("End of request"); 
-            return result;
-
-		} catch (IOException e) {e.printStackTrace();}
-        catch(InterruptedException e2) {System.out.println("Fail to launch mysql command");} 
+			// lire un fichier
+			String chaine = "";
+			InputStream ips=new FileInputStream(file); 
+			InputStreamReader ipsr=new InputStreamReader(ips);
+			BufferedReader br=new BufferedReader(ipsr);
+			String ligne;
+			while ((ligne=br.readLine())!=null){
+				chaine+=ligne+"\n";
+			}
+			br.close(); 
+			//ajouter nombase + fichier
+			this.sendMYSQLRequest(file+"m","use " + PropertiesHandler.NomSQL1 + ";\n" + chaine);
+			
+		} catch (IOException e) {e.printStackTrace();} 
 		return "Error";
 	}
 	

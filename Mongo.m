@@ -1,0 +1,1 @@
+db.EcoleMongoDB.find({IdEcole:"5"}).forEach(printjson);

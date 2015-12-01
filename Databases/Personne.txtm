@@ -1,3 +1,5 @@
+use y;
+use y;
 DROP TABLE IF EXISTS Personne;
 CREATE TABLE Personne
 (
