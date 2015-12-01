@@ -67,8 +67,10 @@ public class DatabaseManager {
 	}
 	
 	public void clear() throws IOException{
+		if (PropertiesHandler.Clean){
 		mysql.clear();
 		mongo.clear();
+		}
 	}
 	
 	public void print2DimTableInConsole(String[][] tab)

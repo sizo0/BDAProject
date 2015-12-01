@@ -128,7 +128,7 @@ public class MongoDBManager {
             } 
             
             //remove compiling file if didn't exist before
-        	if (remove){
+        	if (remove&&!PropertiesHandler.CompileFile){
         		if(file1.delete()){
         			System.out.println("Compilation file " + file1.getName() + " has been deleted!");
         		}else{
