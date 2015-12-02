@@ -1,33 +1,37 @@
 package sql;
 
-import org.jooq.Condition;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectSelectStep;
-import query.Where;
+import org.jooq.*;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+
+import static org.jooq.impl.DSL.*;
 
 public class DB {
     public static final DB INSTANCE = new DB();
     List<Table> tables;
 
+    Map<String, Table> hashedTables; // TODO make query class and place all methods and this attr in it
+    String currentVarTable;
+
     private DB() {
+        hashedTables = new HashMap<>();
+
+
         tables = new ArrayList<>();
         Table personnes = new Table("Personnes");
         Table formations = new Table("Formations");
         Table ecoles = new Table("Ecoles");
 
 
-        Column id = new Column("id", personnes);
+        Column id = new PrimaryKey("id", personnes);
         Column nom = new Column("nom", personnes);
         Column prenom = new Column("prenom", personnes);
         Column idFormation = new ForeignKey("idFormation", personnes, formations);
 
-        Column idF = new Column("id", formations);
+        Column idF = new PrimaryKey("id", formations);
         Column nomF = new Column("nom", formations);
         Column idEcole = new ForeignKey("idEcole", formations, ecoles);
 
@@ -44,58 +48,96 @@ public class DB {
         tables.add(formations);
     }
 
-    public SelectSelectStep<Record> queryFromTablesAndColumns(SelectSelectStep<Record> query, String document, List<String> tablesOrColumns) throws Exception {
-        String last = tablesOrColumns.get(tablesOrColumns.size() - 1 );
-        List res = new LinkedList<>();
-        if(isAttribut(last)){ // Last is an attribut
-            Table t = getColumn(last).getOrigin();
-            Column c = getColumn(last);
-            if(!t.getName().equals(tablesOrColumns.get(tablesOrColumns.size() - 2))){
-                throw new Exception("Last attribute is not in the table : "+ tablesOrColumns.get(tablesOrColumns.size() - 2));
-            }
-            for(int i =0; i < tablesOrColumns.size() - 2 ; i++){ // On cherche a voir si toute les tables sont liées
-                Table current = getTable(tablesOrColumns.get(i));
-                Table next = getTable(tablesOrColumns.get(i + 1));
-                if(isLinkTable(current,next)){ // si lié on rajoute la table current
-                    res.add(current);
-                }else{
-                    throw new Exception("The tables :" + current.getName() +" and "+ next.getName() + " are not linked");
-                    /*test*/
-                }
-            }
-            res.add(t);
-            res.add(c);
-        }else{ //Last is a tables
-            for(int i =0; i < tablesOrColumns.size() - 1 ; i++){ // On cherche a voir si toute les tables sont liées
-                Table current = getTable(tablesOrColumns.get(i));
-                Table next = getTable(tablesOrColumns.get(i + 1));
-                if(isLinkTable(current,next)){ // si lié on rajoute la table current
-                    res.add(current);
-                }else{
-                    throw new Exception("The tables :" + current.getName() +" and "+ next.getName() + " are not linked");
-                }
-            }
-        }
-
-        //return res;
-        return query;
+    public String getTableFromVarName() {
+        if (hashedTables.containsKey(currentVarTable))
+            return hashedTables.get(currentVarTable).getName();
+        throw new Error(currentVarTable + " was not declared.");
     }
 
-    private boolean isLinkTable(Table current,Table next) {
-        for(Column column : current.getColumns()){
-            if(column instanceof ForeignKey){
-                if(((ForeignKey) column).getRef().getName().equals(next.getName())){
-                    return true;
-                }
+    public void setCurrentVarTable(String var) {
+        currentVarTable = var;
+    }
+
+    public List<Table> getTableFromTablesAndColumns(String document, List<String> tablesOrColumns) throws Exception {
+
+        if (!document.equals(tablesOrColumns.get(0)))
+            tablesOrColumns.add(0, document);
+        System.out.println(tablesOrColumns);
+        String last = tablesOrColumns.get(tablesOrColumns.size() - 1);
+        System.out.println(last + " " + isAttribut(last));
+        List<Table> res = new ArrayList<>();
+        if (isAttribut(last)) { // Last is an attribut
+            Column c = getColumn(last);
+            Table t = c.getOrigin();
+            System.out.println(c + " " + t);
+            if (!t.getName().toLowerCase().equals(tablesOrColumns.get(tablesOrColumns.size() - 2).toLowerCase())) {
+                throw new Exception("Last attribute is not in the table : " + tablesOrColumns.get(tablesOrColumns.size() - 2));
+            }
+            tablesOrColumns.remove(tablesOrColumns.size() - 1);
+        } else if (!isTable(last)) { //Last is a tables
+            throw new Error(last + " is neither a table or a column!");
+        }
+
+        res.add(getTable(tablesOrColumns.get(0)));
+        for (int i = 1; i < tablesOrColumns.size(); i++) { // On cherche a voir si toute les tables sont liées
+            Table current = getTable(tablesOrColumns.get(i));
+            Table previous = getTable(tablesOrColumns.get(i - 1));
+            if (isLinkTable(current, previous)) { // si lié on rajoute la table current
+                res.add(current);
+            } else {
+                throw new Error("The tables: " + current.getName() + " and " + previous.getName() + " are not linked");
             }
         }
-        return false;
+
+        System.out.println("RES " + res);
+
+        if (currentVarTable != null)
+            hashedTables.put(currentVarTable, res.get(res.size() - 1));
+
+        return res;
+    }
+
+    private SelectJoinStep<Record> joinQueryFromTables(SelectJoinStep<Record> q, List<Table> tables) {
+        for (int i = tables.size() - 2; i >= 0; i--) {
+            Table table1 = tables.get(i + 1);
+            Table table2 = tables.get(i);
+            System.out.println(table1.getPrimaryKey().getName());
+            System.out.println(table2.getForeignKey(table1).getName());
+            q = q.join(table(table2.getName()))
+                    .on(field(table1.getPrimaryKey().getName()).equal(field(table2.getForeignKey(table1).getName())));
+        }
+        return q;
+    }
+
+    public SelectJoinStep<Record> queryFromTablesAndColumns(SelectJoinStep<Record> join, String document, List<String> tablesOrColumns) throws Exception {
+        List<Table> res = getTableFromTablesAndColumns(document, tablesOrColumns);
+
+        join = join.join(table(res.get(res.size() - 1).getName())).on();
+
+        return joinQueryFromTables(join, res);
+    }
+
+    public SelectJoinStep<Record> queryFromTablesAndColumns(String document, List<String> tablesOrColumns) throws Exception {
+        List<Table> res = getTableFromTablesAndColumns(document, tablesOrColumns);
+
+        SelectJoinStep<Record> q = select().select(field("*")).from(table(res.get(res.size() - 1).getName()));
+
+        return joinQueryFromTables(q, res);
+    }
+
+    private boolean isTable(String last) {
+        return tables.stream()
+                .anyMatch(table -> last.toLowerCase().equals(table.getName().toLowerCase()));
+    }
+
+    private boolean isLinkTable(Table current, Table previous) {
+        return previous.getForeignKey(foreignKey -> foreignKey.getRef().getName().toLowerCase().equals(current.getName().toLowerCase())).isPresent();
     }
 
     private Column getColumn(String last) {
-        for (Table t : tables){
-            for(Column c : t.getColumns()){
-                if(c.getName().equals(last)){
+        for (Table t : tables) {
+            for (Column c : t.getColumns()) {
+                if (c.getName().toLowerCase().equals(last.toLowerCase())) {
                     return c;
                 }
             }
@@ -104,8 +146,8 @@ public class DB {
     }
 
     private Table getTable(String s) {
-        for (Table t : tables){
-            if(t.getName().equals(s)){
+        for (Table t : tables) {
+            if (t.getName().toLowerCase().equals(s.toLowerCase())) {
                 return t;
             }
         }
@@ -113,41 +155,14 @@ public class DB {
     }
 
     private boolean isAttribut(String s) {
-        for (Table t : tables){
-            for(Column c : t.getColumns()){
-                if(c.getName().equals(s)){
+        for (Table t : tables) {
+            for (Column c : t.getColumns()) {
+                if (c.getName().equals(s)) {
                     return true;
                 }
             }
         }
         return false;
-    }
-
-    public Condition queryWhere(List<Where> wheres, List<String> operators) {
-        List<Condition> cwheres = wheres.stream()
-                .map(where -> {
-                    try {
-                        return where.toSQL();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }).collect(Collectors.toList());
-        Condition cwhere1 = cwheres.get(0);
-        cwheres.remove(0);
-
-        final int[] i = {0};
-        return cwheres.stream()
-                .reduce(cwhere1,
-                        (cwhere, acc) -> {
-                            Condition c;
-                            if (operators.get(i[0]).equals("and"))
-                                c = acc.and(cwhere);
-                            else
-                                c = acc.or(cwhere);
-                            i[0]++;
-                            return c;
-                        });
     }
 
     public Condition makeCondition(Condition cwhere1, String operator, Condition cwhere2) {

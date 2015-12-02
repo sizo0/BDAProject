@@ -2,6 +2,11 @@ package sql;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 /*test*/
 public class Table {
 	private String name;
@@ -32,5 +37,33 @@ public class Table {
 
 	public List<Column> getColumns() {
 		return columns;
+	}
+
+	@Override
+	public String toString() {
+		return "Table{" +
+				"name='" + name + '\'' +
+				", columns=" + columns +
+				'}';
+	}
+
+	public Optional<Column> getForeignKey(Predicate<ForeignKey> p) {
+		return columns.stream()
+				.filter(column -> column instanceof ForeignKey && p.test((ForeignKey) column))
+				.findFirst();
+	}
+
+	public Column getForeignKey(Table t) {
+		return columns.stream()
+				.filter(column -> column instanceof ForeignKey && ((ForeignKey) column).getRef().getName().toLowerCase().equals(t.getName().toLowerCase()))
+				.findFirst()
+				.get();
+	}
+
+	public Column getPrimaryKey() {
+		return columns.stream()
+				.filter(column -> column instanceof PrimaryKey)
+				.findFirst()
+				.get();
 	}
 }

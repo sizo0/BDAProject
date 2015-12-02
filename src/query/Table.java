@@ -26,4 +26,12 @@ public class Table {
 	public List<Column> getColumns() {
 		return columns;
 	}
+
+	@Override
+	public String toString() {
+		return "Table{" +
+				"name='" + name + '\'' +
+				", columns=" + columns +
+				'}';
+	}
 }

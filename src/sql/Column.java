@@ -10,7 +10,7 @@ public class Column {
 	}
 
 	public String getName() {
-		return name;
+		return origin.getName() + "." + name;
 	}
 
 	public Table getOrigin() {

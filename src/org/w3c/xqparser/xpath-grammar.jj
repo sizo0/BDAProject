@@ -15,7 +15,7 @@ package org.w3c.xqparser;
 import org.jooq.conf.ParamType;
 import org.jooq.Condition;
 import org.jooq.Record;
-import org.jooq.SelectSelectStep;
+import org.jooq.SelectJoinStep;
 import org.w3c.xqparser.Node;
 import org.w3c.xqparser.SimpleNode;
 
@@ -39,7 +39,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
 
 /*@egen*/
       
-    SelectSelectStep<Record> query = select();
+    SelectJoinStep<Record> query;
     String document;
     List<String> tablesOrColumns = new ArrayList<String>();
     Stack<Condition> cwheres = new Stack<Condition>();
@@ -136,7 +136,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
                     numberArgsLeft--;
                     Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
                     XPath parser = new XPath(fis);
-                    SelectSelectStep<Record> query = parser.XPath2();
+                    SelectJoinStep<Record> query = parser.XPath2();
                     if (dumpTree)
                         System.out.println(query.getSQL());
                 } else if (args[argsStart].endsWith(".xquery")) {
@@ -146,7 +146,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
                     numberArgsLeft--;
                     Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
                     XPath parser = new XPath(fis);
-                    SelectSelectStep<Record> query = parser.XPath2();
+                    SelectJoinStep<Record> query = parser.XPath2();
                     if (dumpTree)
                         System.out.println(query.getSQL());
                 }         else if ("-catalog".equalsIgnoreCase(args[argsStart])) {
@@ -219,7 +219,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
                                 File file = new File(absFileName);
                                 Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
                                 XPath parser = new XPath(fis);
-                                SelectSelectStep<Record> q = parser.XPath2();
+                                SelectJoinStep<Record> q = parser.XPath2();
                                 if(isParseError)
                                     failedList.addElement(fileString);
                                 if (dumpTree)
@@ -266,7 +266,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
           Reader fis = new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(args[i]), "UTF-8"));
 					XPath parser = new XPath(fis);
           SimpleNode tree;
-          SelectSelectStep<Record> query;
+          SelectJoinStep<Record> query;
           if(isMatchParser)
           {
 					query = parser.XPath2();
@@ -304,9 +304,9 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
 			      if(null == input || input.trim().length() == 0)
 			        break;
 			      XPath parser = new XPath(new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(input), "UTF-8")));
-					SelectSelectStep<Record> query = parser.XPath2();
+					SelectJoinStep<Record> query = parser.XPath2();
 //			      ((SimpleNode)tree.jjtGetChild(0)).dump("|") ;
-                System.out.println(query.getSQL());
+                System.out.println(query.getSQL(ParamType.INLINED));
 			  }
 			  catch(ParseException pe)
 			  {
@@ -417,7 +417,7 @@ TOKEN_MGR_DECLS : {
 }
 
 
-		SelectSelectStep<Record> XPath2() :
+		SelectJoinStep<Record> XPath2() :
 		{/*@bgen(jjtree) XPath2 */
   SimpleNode jjtn000 = new SimpleNode(this, JJTXPATH2);
   boolean jjtc000 = true;
@@ -1662,12 +1662,14 @@ void ForClause()  :
 {/*@bgen(jjtree) ForClause */
   try {
 /*@egen*/
-  "for" "$" VarName() "in" ExprSingle() {
+  "for" "$" VarName() {
+  System.out.println("VarName " + token.toString());
+  } "in" ExprSingle() {
   isDocument = false;afterDocument=false;
   System.out.println(document);
   System.out.println(tablesOrColumns);
   // todo retrieve tables and columns from tablesOrColumns using sql package and begin making query
-  query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
+  query = DB.INSTANCE.queryFromTablesAndColumns(document, tablesOrColumns);
   } (// todo join
   {
   isJoin = true;
@@ -1677,6 +1679,7 @@ void ForClause()  :
   isDocument = false;afterDocument=false;
   System.out.println(document);
   System.out.println(tablesOrColumns);
+  query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
   }
   )*/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
@@ -1786,7 +1789,7 @@ void WhereClause()  :
     System.out.println("CWHERES");
     System.out.println(cwheres);
     System.out.println(operators);
-    System.out.println(select(field("BOOK.TITLE")).from(table("cda")).where(cwheres.pop()).getSQL(ParamType.INLINED));
+    System.out.println(query.where(cwheres.pop()).getSQL(ParamType.INLINED));
   }
   } catch (Throwable jjte000) {
     if (jjtc000) {
@@ -3744,6 +3747,7 @@ void PrimaryExpr()        :
 void Literal()        :
 {}
 {
+{afterComparison=false;}
   (NumericLiteral() | <StringLiteral>{
   String value = token.toString();
       value=value.substring(1, value.length() - 1);
@@ -3855,7 +3859,9 @@ void VarName()  :
 {/*@bgen(jjtree) VarName */
   try {
 /*@egen*/
-  QName()/*@bgen(jjtree)*/
+  QName() {
+  DB.INSTANCE.setCurrentVarTable(token.toString());
+  }/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -6614,13 +6620,16 @@ void QName()  :
   (FunctionQName() {
   if (afterDocument) tablesOrColumns.add(token.toString());
   if (isWhere && isStep) {
-    if (afterComparison) {
-        currentWhere.setValue(new Value(token.toString(), new StringConvert()));
+  System.out.println(currentWhere + " " + afterComparison + " " + token.toString());
+    if (afterComparison && currentWhere.getColumn() != null) {
+        currentWhere.setFieldTransform(true);
+        currentWhere.setValue(new Value((new Column(
+        DB.INSTANCE.getTableFromVarName(), token.toString())).toString(), new StringConvert()));
         cwheres.push(currentWhere.toSQL());
         currentWhere = new Where();
     }
     else
-        currentWhere.setColumn(new Column(token.toString()));
+        currentWhere.setColumn(new Column(DB.INSTANCE.getTableFromVarName(), token.toString()));
     afterComparison=false;
   }
   } | "attribute"/*@bgen(jjtree)*/

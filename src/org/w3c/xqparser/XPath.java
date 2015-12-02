@@ -4,7 +4,7 @@ package org.w3c.xqparser;
 import org.jooq.conf.ParamType;
 import org.jooq.Condition;
 import org.jooq.Record;
-import org.jooq.SelectSelectStep;
+import org.jooq.SelectJoinStep;
 import org.w3c.xqparser.Node;
 import org.w3c.xqparser.SimpleNode;
 
@@ -25,7 +25,7 @@ import query.command.*;
 
 public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants {/*@bgen(jjtree)*/
   protected JJTXPathState jjtree = new JJTXPathState();
-    SelectSelectStep<Record> query = select();
+    SelectJoinStep<Record> query;
     String document;
     List<String> tablesOrColumns = new ArrayList<String>();
     Stack<Condition> cwheres = new Stack<Condition>();
@@ -122,7 +122,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
                     numberArgsLeft--;
                     Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
                     XPath parser = new XPath(fis);
-                    SelectSelectStep<Record> query = parser.XPath2();
+                    SelectJoinStep<Record> query = parser.XPath2();
                     if (dumpTree)
                         System.out.println(query.getSQL());
                 } else if (args[argsStart].endsWith(".xquery")) {
@@ -132,7 +132,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
                     numberArgsLeft--;
                     Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
                     XPath parser = new XPath(fis);
-                    SelectSelectStep<Record> query = parser.XPath2();
+                    SelectJoinStep<Record> query = parser.XPath2();
                     if (dumpTree)
                         System.out.println(query.getSQL());
                 }         else if ("-catalog".equalsIgnoreCase(args[argsStart])) {
@@ -205,7 +205,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
                                 File file = new File(absFileName);
                                 Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
                                 XPath parser = new XPath(fis);
-                                SelectSelectStep<Record> q = parser.XPath2();
+                                SelectJoinStep<Record> q = parser.XPath2();
                                 if(isParseError)
                                     failedList.addElement(fileString);
                                 if (dumpTree)
@@ -252,7 +252,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
           Reader fis = new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(args[i]), "UTF-8"));
                                         XPath parser = new XPath(fis);
           SimpleNode tree;
-          SelectSelectStep<Record> query;
+          SelectJoinStep<Record> query;
           if(isMatchParser)
           {
                                         query = parser.XPath2();
@@ -290,9 +290,9 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
                               if(null == input || input.trim().length() == 0)
                                 break;
                               XPath parser = new XPath(new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(input), "UTF-8")));
-                                        SelectSelectStep<Record> query = parser.XPath2();
+                                        SelectJoinStep<Record> query = parser.XPath2();
 //			      ((SimpleNode)tree.jjtGetChild(0)).dump("|") ;
-                System.out.println(query.getSQL());
+                System.out.println(query.getSQL(ParamType.INLINED));
                           }
                           catch(ParseException pe)
                           {
@@ -312,7 +312,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
                     }
                   }
 
-  final public SelectSelectStep<Record> XPath2() throws ParseException {
+  final public SelectJoinStep<Record> XPath2() throws ParseException {
                  /*@bgen(jjtree) XPath2 */
   SimpleNode jjtn000 = new SimpleNode(this, JJTXPATH2);
   boolean jjtc000 = true;
@@ -2187,13 +2187,14 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
       jj_consume_token(40);
       jj_consume_token(33);
       VarName();
+  System.out.println("VarName " + token.toString());
       jj_consume_token(41);
       ExprSingle();
   isDocument = false;afterDocument=false;
   System.out.println(document);
   System.out.println(tablesOrColumns);
   // todo retrieve tables and columns from tablesOrColumns using sql package and begin making query
-  query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
+  query = DB.INSTANCE.queryFromTablesAndColumns(document, tablesOrColumns);
       label_9:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -2214,6 +2215,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
   isDocument = false;afterDocument=false;
   System.out.println(document);
   System.out.println(tablesOrColumns);
+  query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
       }
     } catch (Throwable jjte000) {
     if (jjtc000) {
@@ -2344,7 +2346,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     System.out.println("CWHERES");
     System.out.println(cwheres);
     System.out.println(operators);
-    System.out.println(select(field("BOOK.TITLE")).from(table("cda")).where(cwheres.pop()).getSQL(ParamType.INLINED));
+    System.out.println(query.where(cwheres.pop()).getSQL(ParamType.INLINED));
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -5698,6 +5700,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
   }
 
   final public void Literal() throws ParseException {
+ afterComparison=false;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IntegerLiteral:
     case DecimalLiteral:
@@ -5803,6 +5806,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
   jjtree.openNodeScope(jjtn000);
     try {
       QName();
+  DB.INSTANCE.setCurrentVarTable(token.toString());
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -10462,16 +10466,17 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
         FunctionQName();
   if (afterDocument) tablesOrColumns.add(token.toString());
   if (isWhere && isStep) {
-    System.out.println(currentWhere);
-    if (afterComparison) {
-        currentWhere.setValue(new Value(token.toString(), new StringConvert()));
+  System.out.println(currentWhere + " " + afterComparison + " " + token.toString());
+    if (afterComparison && currentWhere.getColumn() != null) {
+        currentWhere.setFieldTransform(true);
+        currentWhere.setValue(new Value((new Column(
+        DB.INSTANCE.getTableFromVarName(), token.toString())).toString(), new StringConvert()));
         cwheres.push(currentWhere.toSQL());
         currentWhere = new Where();
     }
     else
-        currentWhere.setColumn(new Column(token.toString()));
+        currentWhere.setColumn(new Column(DB.INSTANCE.getTableFromVarName(), token.toString()));
     afterComparison=false;
-    System.out.println(currentWhere);
   }
         break;
       case 89:
@@ -11331,16 +11336,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     finally { jj_save(31, xla); }
   }
 
-  private boolean jj_3R_160() {
-    if (jj_scan_token(50)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_298() {
-    if (jj_scan_token(55)) return true;
-    return false;
-  }
-
   private boolean jj_3R_275() {
     if (jj_3R_294()) return true;
     Token xsp;
@@ -11348,16 +11343,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
       xsp = jj_scanpos;
       if (jj_3R_298()) { jj_scanpos = xsp; break; }
     }
-    return false;
-  }
-
-  private boolean jj_3R_201() {
-    if (jj_scan_token(StringLiteral)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_143() {
-    if (jj_scan_token(32)) return true;
     return false;
   }
 
@@ -11386,11 +11371,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_255() {
-    if (jj_3R_265()) return true;
-    return false;
-  }
-
   private boolean jj_3R_265() {
     if (jj_3R_275()) return true;
     Token xsp;
@@ -11398,6 +11378,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
       xsp = jj_scanpos;
       if (jj_3R_293()) { jj_scanpos = xsp; break; }
     }
+    return false;
+  }
+
+  private boolean jj_3R_255() {
+    if (jj_3R_265()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_127() {
+    if (jj_scan_token(17)) return true;
     return false;
   }
 
@@ -11412,11 +11402,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_127() {
-    if (jj_scan_token(17)) return true;
-    return false;
-  }
-
   private boolean jj_3R_178() {
     if (jj_scan_token(75)) return true;
     return false;
@@ -11427,25 +11412,20 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_142() {
+    if (jj_scan_token(31)) return true;
+    return false;
+  }
+
   private boolean jj_3R_52() {
     if (jj_scan_token(51)) return true;
     if (jj_scan_token(36)) return true;
     return false;
   }
 
-  private boolean jj_3R_142() {
-    if (jj_scan_token(31)) return true;
-    return false;
-  }
-
   private boolean jj_3R_105() {
     if (jj_scan_token(14)) return true;
     if (jj_scan_token(36)) return true;
-    return false;
-  }
-
-  private boolean jj_3_21() {
-    if (jj_3R_52()) return true;
     return false;
   }
 
@@ -11460,13 +11440,24 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_67() {
-    if (jj_scan_token(46)) return true;
+  private boolean jj_3_21() {
+    if (jj_3R_52()) return true;
     return false;
   }
 
   private boolean jj_3R_84() {
     if (jj_3R_107()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_67() {
+    if (jj_scan_token(46)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_108() {
+    if (jj_scan_token(113)) return true;
+    if (jj_scan_token(36)) return true;
     return false;
   }
 
@@ -11478,12 +11469,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     if (jj_3R_68()) return true;
     }
     if (jj_scan_token(33)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_108() {
-    if (jj_scan_token(113)) return true;
-    if (jj_scan_token(36)) return true;
     return false;
   }
 
@@ -11513,19 +11498,19 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_126() {
+    if (jj_scan_token(16)) return true;
+    return false;
+  }
+
   private boolean jj_3R_109() {
     if (jj_scan_token(107)) return true;
     if (jj_scan_token(36)) return true;
     return false;
   }
 
-  private boolean jj_3R_126() {
-    if (jj_scan_token(16)) return true;
-    return false;
-  }
-
-  private boolean jj_3_20() {
-    if (jj_3R_51()) return true;
+  private boolean jj_3R_141() {
+    if (jj_scan_token(30)) return true;
     return false;
   }
 
@@ -11540,8 +11525,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_141() {
-    if (jj_scan_token(30)) return true;
+  private boolean jj_3_20() {
+    if (jj_3R_51()) return true;
     return false;
   }
 
@@ -11553,11 +11538,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
 
   private boolean jj_3R_82() {
     if (jj_3R_105()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_65() {
-    if (jj_3R_92()) return true;
     return false;
   }
 
@@ -11578,14 +11558,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_10() {
-    if (jj_3R_41()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_208() {
-    if (jj_scan_token(42)) return true;
-    if (jj_scan_token(33)) return true;
+  private boolean jj_3R_65() {
+    if (jj_3R_92()) return true;
     return false;
   }
 
@@ -11597,6 +11571,17 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
 
   private boolean jj_3R_263() {
     if (jj_3R_273()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_208() {
+    if (jj_scan_token(42)) return true;
+    if (jj_scan_token(33)) return true;
+    return false;
+  }
+
+  private boolean jj_3_10() {
+    if (jj_3R_41()) return true;
     return false;
   }
 
@@ -11641,24 +11626,14 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_19() {
-    if (jj_3R_50()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_203() {
-    if (jj_scan_token(11)) return true;
-    return false;
-  }
-
   private boolean jj_3R_292() {
     if (jj_scan_token(LbraceExprEnclosure)) return true;
     if (jj_3R_229()) return true;
     return false;
   }
 
-  private boolean jj_3R_94() {
-    if (jj_3R_208()) return true;
+  private boolean jj_3_19() {
+    if (jj_3R_50()) return true;
     return false;
   }
 
@@ -11667,13 +11642,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_16() {
-    if (jj_3R_47()) return true;
+  private boolean jj_3R_203() {
+    if (jj_scan_token(11)) return true;
     return false;
   }
 
-  private boolean jj_3R_262() {
-    if (jj_3R_272()) return true;
+  private boolean jj_3R_94() {
+    if (jj_3R_208()) return true;
     return false;
   }
 
@@ -11682,13 +11657,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_291() {
-    if (jj_3R_297()) return true;
-    return false;
-  }
-
-  private boolean jj_3_9() {
-    if (jj_3R_40()) return true;
+  private boolean jj_3R_262() {
+    if (jj_3R_272()) return true;
     return false;
   }
 
@@ -11702,14 +11672,40 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_207() {
-    if (jj_scan_token(40)) return true;
-    if (jj_scan_token(33)) return true;
+  private boolean jj_3R_291() {
+    if (jj_3R_297()) return true;
+    return false;
+  }
+
+  private boolean jj_3_16() {
+    if (jj_3R_47()) return true;
     return false;
   }
 
   private boolean jj_3R_157() {
     if (jj_scan_token(46)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_253() {
+    if (jj_scan_token(109)) return true;
+    return false;
+  }
+
+  private boolean jj_3_9() {
+    if (jj_3R_40()) return true;
+    return false;
+  }
+
+  private boolean jj_3_30() {
+    if (jj_scan_token(109)) return true;
+    if (jj_scan_token(36)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_207() {
+    if (jj_scan_token(40)) return true;
+    if (jj_scan_token(33)) return true;
     return false;
   }
 
@@ -11723,11 +11719,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_253() {
-    if (jj_scan_token(109)) return true;
-    return false;
-  }
-
   private boolean jj_3R_66() {
     Token xsp;
     xsp = jj_scanpos;
@@ -11738,12 +11729,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_30() {
-    if (jj_scan_token(109)) return true;
-    if (jj_scan_token(36)) return true;
-    return false;
-  }
-
   private boolean jj_3R_49() {
     Token xsp;
     if (jj_3R_66()) return true;
@@ -11751,6 +11736,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
       xsp = jj_scanpos;
       if (jj_3R_66()) { jj_scanpos = xsp; break; }
     }
+    return false;
+  }
+
+  private boolean jj_3R_285() {
+    if (jj_scan_token(ProcessingInstructionStart)) return true;
     return false;
   }
 
@@ -11778,21 +11768,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_285() {
-    if (jj_scan_token(ProcessingInstructionStart)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_229() {
-    if (jj_3R_234()) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_254()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
   private boolean jj_3R_290() {
     if (jj_scan_token(LbraceExprEnclosure)) return true;
     if (jj_3R_229()) return true;
@@ -11804,8 +11779,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_8() {
-    if (jj_3R_39()) return true;
+  private boolean jj_3R_229() {
+    if (jj_3R_234()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_254()) { jj_scanpos = xsp; break; }
+    }
     return false;
   }
 
@@ -11821,18 +11801,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_15() {
-    if (jj_3R_46()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_202() {
-    if (jj_scan_token(12)) return true;
-    return false;
-  }
-
   private boolean jj_3R_175() {
     if (jj_scan_token(68)) return true;
+    return false;
+  }
+
+  private boolean jj_3_8() {
+    if (jj_3R_39()) return true;
     return false;
   }
 
@@ -11845,6 +11820,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     if (jj_scan_token(106)) return true;
     if (jj_scan_token(LbraceExprEnclosure)) return true;
     if (jj_3R_229()) return true;
+    return false;
+  }
+
+  private boolean jj_3_15() {
+    if (jj_3R_46()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_202() {
+    if (jj_scan_token(12)) return true;
     return false;
   }
 
@@ -11866,6 +11851,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_124() {
+    if (jj_scan_token(13)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_301() {
+    if (jj_scan_token(CommentContentCharDash)) return true;
+    return false;
+  }
+
   private boolean jj_3_7() {
     Token xsp;
     xsp = jj_scanpos;
@@ -11876,16 +11871,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     if (jj_3_10()) return true;
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_301() {
-    if (jj_scan_token(CommentContentCharDash)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_124() {
-    if (jj_scan_token(13)) return true;
     return false;
   }
 
@@ -11927,6 +11912,23 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_252() {
+    if (jj_scan_token(49)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_270() {
+    if (jj_scan_token(14)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_287()) {
+    jj_scanpos = xsp;
+    if (jj_3R_288()) return true;
+    }
+    if (jj_scan_token(LbraceExprEnclosure)) return true;
+    return false;
+  }
+
   private boolean jj_3R_45() {
     if (jj_scan_token(9)) return true;
     if (jj_scan_token(35)) return true;
@@ -11949,20 +11951,10 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_252() {
-    if (jj_scan_token(49)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_270() {
-    if (jj_scan_token(14)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_287()) {
-    jj_scanpos = xsp;
-    if (jj_3R_288()) return true;
-    }
+  private boolean jj_3R_269() {
+    if (jj_scan_token(104)) return true;
     if (jj_scan_token(LbraceExprEnclosure)) return true;
+    if (jj_3R_229()) return true;
     return false;
   }
 
@@ -11977,36 +11969,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_35() {
-    if (jj_3R_62()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_269() {
-    if (jj_scan_token(104)) return true;
-    if (jj_scan_token(LbraceExprEnclosure)) return true;
-    if (jj_3R_229()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_200() {
-    if (jj_scan_token(12)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_198() {
-    if (jj_scan_token(29)) return true;
-    if (jj_scan_token(5)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_64() {
-    if (jj_scan_token(15)) return true;
-    return false;
-  }
-
   private boolean jj_3R_259() {
     if (jj_3R_269()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_35() {
+    if (jj_3R_62()) return true;
     return false;
   }
 
@@ -12032,6 +12001,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_200() {
+    if (jj_scan_token(12)) return true;
+    return false;
+  }
+
   private boolean jj_3R_174() {
     if (jj_scan_token(67)) return true;
     return false;
@@ -12042,14 +12016,19 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_100() {
-    if (jj_3R_215()) return true;
+  private boolean jj_3R_198() {
+    if (jj_scan_token(29)) return true;
+    if (jj_scan_token(5)) return true;
     return false;
   }
 
-  private boolean jj_3R_48() {
-    if (jj_scan_token(29)) return true;
-    if (jj_scan_token(30)) return true;
+  private boolean jj_3R_64() {
+    if (jj_scan_token(15)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_100() {
+    if (jj_3R_215()) return true;
     return false;
   }
 
@@ -12058,15 +12037,9 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_44() {
-    if (jj_scan_token(9)) return true;
-    if (jj_scan_token(28)) return true;
-    if (jj_3R_201()) return true;
-    return false;
-  }
-
-  private boolean jj_3_13() {
-    if (jj_3R_44()) return true;
+  private boolean jj_3R_48() {
+    if (jj_scan_token(29)) return true;
+    if (jj_scan_token(30)) return true;
     return false;
   }
 
@@ -12080,10 +12053,10 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_43() {
+  private boolean jj_3R_44() {
     if (jj_scan_token(9)) return true;
-    if (jj_scan_token(13)) return true;
-    if (jj_scan_token(27)) return true;
+    if (jj_scan_token(28)) return true;
+    if (jj_3R_201()) return true;
     return false;
   }
 
@@ -12101,13 +12074,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_6() {
-    if (jj_3R_38()) return true;
+  private boolean jj_3R_251() {
+    if (jj_scan_token(105)) return true;
     return false;
   }
 
-  private boolean jj_3R_251() {
-    if (jj_scan_token(105)) return true;
+  private boolean jj_3R_138() {
+    if (jj_scan_token(27)) return true;
     return false;
   }
 
@@ -12116,13 +12089,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_277() {
-    if (jj_scan_token(StartTagOpen)) return true;
+  private boolean jj_3_13() {
+    if (jj_3R_44()) return true;
     return false;
   }
 
-  private boolean jj_3R_138() {
-    if (jj_scan_token(27)) return true;
+  private boolean jj_3R_277() {
+    if (jj_scan_token(StartTagOpen)) return true;
     return false;
   }
 
@@ -12136,6 +12109,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_43() {
+    if (jj_scan_token(9)) return true;
+    if (jj_scan_token(13)) return true;
+    if (jj_scan_token(27)) return true;
+    return false;
+  }
+
   private boolean jj_3R_283() {
     Token xsp;
     while (true) {
@@ -12145,28 +12125,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_204() {
-    if (jj_scan_token(18)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_222() {
-    if (jj_scan_token(11)) return true;
+  private boolean jj_3_6() {
+    if (jj_3R_38()) return true;
     return false;
   }
 
   private boolean jj_3R_281() {
     if (jj_scan_token(XmlCommentStartForElementContent)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_206() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_222()) {
-    jj_scanpos = xsp;
-    if (jj_3R_223()) return true;
-    }
     return false;
   }
 
@@ -12187,13 +12152,33 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_29() {
-    if (jj_3R_60()) return true;
+  private boolean jj_3R_204() {
+    if (jj_scan_token(18)) return true;
     return false;
   }
 
   private boolean jj_3R_173() {
     if (jj_scan_token(66)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_222() {
+    if (jj_scan_token(11)) return true;
+    return false;
+  }
+
+  private boolean jj_3_29() {
+    if (jj_3R_60()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_206() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_222()) {
+    jj_scanpos = xsp;
+    if (jj_3R_223()) return true;
+    }
     return false;
   }
 
@@ -12238,6 +12223,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_257() {
+    if (jj_3R_267()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_122() {
+    if (jj_scan_token(11)) return true;
+    return false;
+  }
+
   private boolean jj_3R_91() {
     if (jj_3R_198()) return true;
     return false;
@@ -12254,13 +12249,18 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_257() {
-    if (jj_3R_267()) return true;
+  private boolean jj_3_28() {
+    if (jj_3R_59()) return true;
     return false;
   }
 
-  private boolean jj_3R_122() {
-    if (jj_scan_token(11)) return true;
+  private boolean jj_3R_231() {
+    if (jj_3R_236()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_190() {
+    if (jj_scan_token(93)) return true;
     return false;
   }
 
@@ -12276,13 +12276,22 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_28() {
-    if (jj_3R_59()) return true;
+  private boolean jj_3R_155() {
+    if (jj_scan_token(Ascending)) return true;
     return false;
   }
 
-  private boolean jj_3R_231() {
-    if (jj_3R_236()) return true;
+  private boolean jj_3R_295() {
+    if (jj_scan_token(S)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_278() {
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_295()) { jj_scanpos = xsp; break; }
+    }
     return false;
   }
 
@@ -12298,43 +12307,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_190() {
-    if (jj_scan_token(93)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_295() {
-    if (jj_scan_token(S)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_155() {
-    if (jj_scan_token(Ascending)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_278() {
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_295()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_38() {
-    if (jj_scan_token(9)) return true;
-    if (jj_scan_token(6)) return true;
-    return false;
-  }
-
   private boolean jj_3R_228() {
     if (jj_3R_234()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_276() {
-    if (jj_scan_token(LessThanOpOrTagO)) return true;
     return false;
   }
 
@@ -12343,8 +12317,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_239() {
-    if (jj_scan_token(DoubleLiteral)) return true;
+  private boolean jj_3R_276() {
+    if (jj_scan_token(LessThanOpOrTagO)) return true;
     return false;
   }
 
@@ -12365,13 +12339,29 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_239() {
+    if (jj_scan_token(DoubleLiteral)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_38() {
+    if (jj_scan_token(9)) return true;
+    if (jj_scan_token(6)) return true;
+    return false;
+  }
+
   private boolean jj_3R_256() {
     if (jj_3R_266()) return true;
     return false;
   }
 
-  private boolean jj_3_4() {
-    if (jj_3R_36()) return true;
+  private boolean jj_3R_250() {
+    if (jj_scan_token(114)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_172() {
+    if (jj_scan_token(65)) return true;
     return false;
   }
 
@@ -12388,13 +12378,23 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_250() {
-    if (jj_scan_token(114)) return true;
+  private boolean jj_3R_230() {
+    if (jj_3R_235()) return true;
     return false;
   }
 
-  private boolean jj_3R_172() {
-    if (jj_scan_token(65)) return true;
+  private boolean jj_3_4() {
+    if (jj_3R_36()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_215() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_230()) {
+    jj_scanpos = xsp;
+    if (jj_3R_231()) return true;
+    }
     return false;
   }
 
@@ -12413,18 +12413,18 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_230() {
-    if (jj_3R_235()) return true;
+  private boolean jj_3R_58() {
+    if (jj_3R_90()) return true;
+    if (jj_scan_token(36)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_228()) jj_scanpos = xsp;
+    if (jj_scan_token(37)) return true;
     return false;
   }
 
-  private boolean jj_3R_215() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_230()) {
-    jj_scanpos = xsp;
-    if (jj_3R_231()) return true;
-    }
+  private boolean jj_3_27() {
+    if (jj_3R_58()) return true;
     return false;
   }
 
@@ -12458,18 +12458,10 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_27() {
-    if (jj_3R_58()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_58() {
-    if (jj_3R_90()) return true;
-    if (jj_scan_token(36)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_228()) jj_scanpos = xsp;
-    if (jj_scan_token(37)) return true;
+  private boolean jj_3R_60() {
+    if (jj_scan_token(19)) return true;
+    if (jj_scan_token(LbraceExprEnclosure)) return true;
+    if (jj_3R_229()) return true;
     return false;
   }
 
@@ -12494,8 +12486,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_60() {
-    if (jj_scan_token(19)) return true;
+  private boolean jj_3R_59() {
+    if (jj_scan_token(18)) return true;
     if (jj_scan_token(LbraceExprEnclosure)) return true;
     if (jj_3R_229()) return true;
     return false;
@@ -12507,30 +12499,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_59() {
-    if (jj_scan_token(18)) return true;
-    if (jj_scan_token(LbraceExprEnclosure)) return true;
-    if (jj_3R_229()) return true;
-    return false;
-  }
-
   private boolean jj_3R_238() {
     if (jj_scan_token(DecimalLiteral)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_34() {
-    if (jj_3R_61()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_387() {
-    if (jj_scan_token(StarColonNCName)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_214() {
-    if (jj_scan_token(103)) return true;
     return false;
   }
 
@@ -12539,8 +12509,23 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_214() {
+    if (jj_scan_token(103)) return true;
+    return false;
+  }
+
   private boolean jj_3R_227() {
     if (jj_3R_229()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_387() {
+    if (jj_scan_token(StarColonNCName)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_34() {
+    if (jj_3R_61()) return true;
     return false;
   }
 
@@ -12558,14 +12543,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_33() {
-    if (jj_scan_token(2)) return true;
-    if (jj_scan_token(3)) return true;
+  private boolean jj_3R_136() {
+    if (jj_scan_token(25)) return true;
     return false;
   }
 
-  private boolean jj_3R_136() {
-    if (jj_scan_token(25)) return true;
+  private boolean jj_3R_171() {
+    if (jj_scan_token(64)) return true;
     return false;
   }
 
@@ -12574,8 +12558,9 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_33()) return true;
+  private boolean jj_3R_33() {
+    if (jj_scan_token(2)) return true;
+    if (jj_scan_token(3)) return true;
     return false;
   }
 
@@ -12584,8 +12569,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_171() {
-    if (jj_scan_token(64)) return true;
+  private boolean jj_3_1() {
+    if (jj_3R_33()) return true;
     return false;
   }
 
@@ -12602,6 +12587,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
 
   private boolean jj_3R_225() {
     if (jj_scan_token(StringLiteral)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_249() {
+    if (jj_scan_token(113)) return true;
     return false;
   }
 
@@ -12623,18 +12613,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_249() {
-    if (jj_scan_token(113)) return true;
+  private boolean jj_3R_153() {
+    if (jj_scan_token(44)) return true;
     return false;
   }
 
   private boolean jj_3R_98() {
     if (jj_3R_213()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_153() {
-    if (jj_scan_token(44)) return true;
     return false;
   }
 
@@ -12649,6 +12634,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_97() {
+    if (jj_3R_212()) return true;
+    return false;
+  }
+
   private boolean jj_3R_211() {
     Token xsp;
     xsp = jj_scanpos;
@@ -12659,18 +12649,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_97() {
-    if (jj_3R_212()) return true;
+  private boolean jj_3R_120() {
+    if (jj_scan_token(9)) return true;
     return false;
   }
 
   private boolean jj_3R_386() {
     if (jj_scan_token(NCNameColonStar)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_120() {
-    if (jj_scan_token(9)) return true;
     return false;
   }
 
@@ -12686,8 +12671,18 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_135() {
+    if (jj_scan_token(24)) return true;
+    return false;
+  }
+
   private boolean jj_3R_96() {
     if (jj_3R_211()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_170() {
+    if (jj_scan_token(63)) return true;
     return false;
   }
 
@@ -12736,19 +12731,9 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_135() {
-    if (jj_scan_token(24)) return true;
-    return false;
-  }
-
   private boolean jj_3R_218() {
     if (jj_scan_token(96)) return true;
     if (jj_scan_token(87)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_170() {
-    if (jj_scan_token(63)) return true;
     return false;
   }
 
@@ -12881,11 +12866,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_103() {
-    if (jj_scan_token(100)) return true;
-    return false;
-  }
-
   private boolean jj_3R_119() {
     if (jj_scan_token(6)) return true;
     return false;
@@ -12893,6 +12873,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
 
   private boolean jj_3R_169() {
     if (jj_scan_token(61)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_103() {
+    if (jj_scan_token(100)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_248() {
+    if (jj_scan_token(107)) return true;
     return false;
   }
 
@@ -12906,14 +12896,14 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_248() {
-    if (jj_scan_token(107)) return true;
-    return false;
-  }
-
   private boolean jj_3R_217() {
     if (jj_scan_token(95)) return true;
     if (jj_scan_token(87)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_151() {
+    if (jj_scan_token(42)) return true;
     return false;
   }
 
@@ -12933,11 +12923,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     }
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_151() {
-    if (jj_scan_token(42)) return true;
     return false;
   }
 
@@ -12961,13 +12946,18 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_134() {
+    if (jj_scan_token(22)) return true;
+    return false;
+  }
+
   private boolean jj_3R_374() {
     if (jj_3R_375()) return true;
     return false;
   }
 
-  private boolean jj_3R_134() {
-    if (jj_scan_token(22)) return true;
+  private boolean jj_3R_187() {
+    if (jj_scan_token(90)) return true;
     return false;
   }
 
@@ -12981,11 +12971,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     xsp = jj_scanpos;
     if (jj_3R_378()) jj_scanpos = xsp;
     if (jj_3R_379()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_187() {
-    if (jj_scan_token(90)) return true;
     return false;
   }
 
@@ -13035,8 +13020,18 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_118() {
+    if (jj_scan_token(5)) return true;
+    return false;
+  }
+
   private boolean jj_3_25() {
     if (jj_3R_56()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_247() {
+    if (jj_scan_token(111)) return true;
     return false;
   }
 
@@ -13050,13 +13045,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_118() {
-    if (jj_scan_token(5)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_247() {
-    if (jj_scan_token(111)) return true;
+  private boolean jj_3R_150() {
+    if (jj_scan_token(41)) return true;
     return false;
   }
 
@@ -13067,11 +13057,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
 
   private boolean jj_3_24() {
     if (jj_3R_55()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_150() {
-    if (jj_scan_token(41)) return true;
     return false;
   }
 
@@ -13171,16 +13156,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_330() {
-    if (jj_scan_token(81)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_363() {
-    if (jj_3R_365()) return true;
-    return false;
-  }
-
   private boolean jj_3R_246() {
     if (jj_scan_token(110)) return true;
     return false;
@@ -13193,6 +13168,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
 
   private boolean jj_3R_149() {
     if (jj_scan_token(40)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_330() {
+    if (jj_scan_token(81)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_363() {
+    if (jj_3R_365()) return true;
     return false;
   }
 
@@ -13293,16 +13278,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_327() {
-    if (jj_scan_token(72)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_357() {
-    if (jj_3R_359()) return true;
-    return false;
-  }
-
   private boolean jj_3R_166() {
     if (jj_scan_token(58)) return true;
     return false;
@@ -13313,8 +13288,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_326() {
-    if (jj_scan_token(71)) return true;
+  private boolean jj_3R_327() {
+    if (jj_scan_token(72)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_357() {
+    if (jj_3R_359()) return true;
     return false;
   }
 
@@ -13323,8 +13303,18 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_326() {
+    if (jj_scan_token(71)) return true;
+    return false;
+  }
+
   private boolean jj_3R_325() {
     if (jj_scan_token(LessThanOpOrTagO)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_148() {
+    if (jj_scan_token(39)) return true;
     return false;
   }
 
@@ -13357,11 +13347,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     }
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_148() {
-    if (jj_scan_token(39)) return true;
     return false;
   }
 
@@ -13430,6 +13415,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_184() {
+    if (jj_scan_token(83)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_244() {
+    if (jj_scan_token(14)) return true;
+    return false;
+  }
+
   private boolean jj_3R_354() {
     if (jj_scan_token(Minus)) return true;
     return false;
@@ -13445,11 +13440,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_184() {
-    if (jj_scan_token(83)) return true;
-    return false;
-  }
-
   private boolean jj_3R_350() {
     Token xsp;
     while (true) {
@@ -13457,11 +13447,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
       if (jj_3R_352()) { jj_scanpos = xsp; break; }
     }
     if (jj_3R_353()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_244() {
-    if (jj_scan_token(14)) return true;
     return false;
   }
 
@@ -13501,6 +13486,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_164() {
+    if (jj_scan_token(55)) return true;
+    return false;
+  }
+
   private boolean jj_3R_342() {
     if (jj_3R_346()) return true;
     Token xsp;
@@ -13519,8 +13509,8 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_164() {
-    if (jj_scan_token(55)) return true;
+  private boolean jj_3R_131() {
+    if (jj_scan_token(21)) return true;
     return false;
   }
 
@@ -13529,11 +13519,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_343()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private boolean jj_3R_131() {
-    if (jj_scan_token(21)) return true;
     return false;
   }
 
@@ -13547,6 +13532,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_183() {
+    if (jj_scan_token(80)) return true;
+    return false;
+  }
+
   private boolean jj_3R_339() {
     Token xsp;
     xsp = jj_scanpos;
@@ -13557,18 +13547,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_183() {
-    if (jj_scan_token(80)) return true;
+  private boolean jj_3R_146() {
+    if (jj_scan_token(84)) return true;
     return false;
   }
 
   private boolean jj_3R_341() {
     if (jj_scan_token(62)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_146() {
-    if (jj_scan_token(84)) return true;
     return false;
   }
 
@@ -13617,16 +13602,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_336() {
-    if (jj_scan_token(59)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_335() {
-    if (jj_scan_token(58)) return true;
-    return false;
-  }
-
   private boolean jj_3R_130() {
     if (jj_scan_token(20)) return true;
     return false;
@@ -13634,6 +13609,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
 
   private boolean jj_3R_182() {
     if (jj_scan_token(79)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_336() {
+    if (jj_scan_token(59)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_335() {
+    if (jj_scan_token(58)) return true;
     return false;
   }
 
@@ -13683,6 +13668,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_162() {
+    if (jj_scan_token(53)) return true;
+    return false;
+  }
+
   private boolean jj_3R_308() {
     if (jj_3R_313()) return true;
     Token xsp;
@@ -13705,11 +13695,6 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     jj_scanpos = xsp;
     if (jj_3R_316()) return true;
     }
-    return false;
-  }
-
-  private boolean jj_3R_162() {
-    if (jj_scan_token(53)) return true;
     return false;
   }
 
@@ -13743,13 +13728,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_304() {
-    if (jj_scan_token(56)) return true;
+  private boolean jj_3R_196() {
+    if (jj_scan_token(104)) return true;
     return false;
   }
 
-  private boolean jj_3R_196() {
-    if (jj_scan_token(104)) return true;
+  private boolean jj_3R_304() {
+    if (jj_scan_token(56)) return true;
     return false;
   }
 
@@ -13768,16 +13753,16 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_180() {
+    if (jj_scan_token(77)) return true;
+    return false;
+  }
+
   private boolean jj_3R_299() {
     if (jj_3R_303()) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_304()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private boolean jj_3R_180() {
-    if (jj_scan_token(77)) return true;
     return false;
   }
 
@@ -13799,13 +13784,13 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
-  private boolean jj_3R_89() {
-    if (jj_3R_112()) return true;
+  private boolean jj_3R_113() {
+    if (jj_scan_token(QNameToken)) return true;
     return false;
   }
 
-  private boolean jj_3R_113() {
-    if (jj_scan_token(QNameToken)) return true;
+  private boolean jj_3R_89() {
+    if (jj_3R_112()) return true;
     return false;
   }
 
@@ -14147,13 +14132,33 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
     return false;
   }
 
+  private boolean jj_3R_179() {
+    if (jj_scan_token(76)) return true;
+    return false;
+  }
+
   private boolean jj_3R_87() {
     if (jj_3R_110()) return true;
     return false;
   }
 
-  private boolean jj_3R_179() {
-    if (jj_scan_token(76)) return true;
+  private boolean jj_3R_160() {
+    if (jj_scan_token(50)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_143() {
+    if (jj_scan_token(32)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_298() {
+    if (jj_scan_token(55)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_201() {
+    if (jj_scan_token(StringLiteral)) return true;
     return false;
   }
 
@@ -14374,18 +14379,21 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants, XPathConstants
       for (int i = 0; i < jj_endpos; i++) {
         jj_expentry[i] = jj_lasttokens[i];
       }
-      jj_entries_loop: for (java.util.Iterator<?> it = jj_expentries.iterator(); it.hasNext();) {
+      boolean exists = false;
+      for (java.util.Iterator<?> it = jj_expentries.iterator(); it.hasNext();) {
+        exists = true;
         int[] oldentry = (int[])(it.next());
         if (oldentry.length == jj_expentry.length) {
           for (int i = 0; i < jj_expentry.length; i++) {
             if (oldentry[i] != jj_expentry[i]) {
-              continue jj_entries_loop;
+              exists = false;
+              break;
             }
           }
-          jj_expentries.add(jj_expentry);
-          break jj_entries_loop;
+          if (exists) break;
         }
       }
+      if (!exists) jj_expentries.add(jj_expentry);
       if (pos != 0) jj_lasttokens[(jj_endpos = pos) - 1] = kind;
     }
   }

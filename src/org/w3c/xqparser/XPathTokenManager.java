@@ -3,7 +3,7 @@ package org.w3c.xqparser;
 import org.jooq.conf.ParamType;
 import org.jooq.Condition;
 import org.jooq.Record;
-import org.jooq.SelectSelectStep;
+import org.jooq.SelectJoinStep;
 import org.w3c.xqparser.Node;
 import org.w3c.xqparser.SimpleNode;
 import java.io.*;

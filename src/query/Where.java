@@ -11,10 +11,14 @@ public class Where {
     private Column column;
     private String operator;
     private Value value;
+    private boolean fieldTransform;
 
-    public Where() { }
+    public Where() {
+        fieldTransform = false;
+    }
 
     public Where(Column column, String operator, Value value) {
+        this();
         this.column = column;
         this.operator = operator;
         this.value = value;
@@ -47,17 +51,17 @@ public class Where {
     public Condition toSQL() throws Exception {
         switch (operator) {
             case "=":
-                return field(column.toString()).eq(value.getValue());
+                return field(column.toString()).eq(fieldTransform ? field(value.getValue().toString()) : value.getValue());
             case "!=":
-                return field(column.toString()).ne(value.getValue());
+                return field(column.toString()).ne(fieldTransform ? field(value.getValue().toString()) : value.getValue());
             case ">=":
-                return field(column.toString()).ge(value.getValue());
+                return field(column.toString()).ge(fieldTransform ? field(value.getValue().toString()) : value.getValue());
             case "<=":
-                return field(column.toString()).le(value.getValue());
+                return field(column.toString()).le(fieldTransform ? field(value.getValue().toString()) : value.getValue());
             case "<":
-                return field(column.toString()).lt(value.getValue());
+                return field(column.toString()).lt(fieldTransform ? field(value.getValue().toString()) : value.getValue());
             case ">":
-                return field(column.toString()).gt(value.getValue());
+                return field(column.toString()).gt(fieldTransform ? field(value.getValue().toString()) : value.getValue());
             default:
                 throw new Exception("Operator: " + operator + " not implemented!");
         }
@@ -70,5 +74,13 @@ public class Where {
                 ", operator='" + operator + '\'' +
                 ", value='" + value + '\'' +
                 '}';
+    }
+
+    public boolean isFieldTransform() {
+        return fieldTransform;
+    }
+
+    public void setFieldTransform(boolean fieldTransform) {
+        this.fieldTransform = fieldTransform;
     }
 }
