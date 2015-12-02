@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * sizo0
  */
-public class Select extends Query {
+public class Select {
     private List<Column> columns;
     private List<String> tables;
     private List<Where> wheres;

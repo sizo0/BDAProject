@@ -20,10 +20,8 @@ import org.w3c.xqparser.Node;
 import org.w3c.xqparser.SimpleNode;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-import java.util.Vector;
+import java.util.*;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import javax.xml.parsers.*;
@@ -34,6 +32,7 @@ import org.w3c.dom.traversal.TreeWalker;
 import static org.jooq.impl.DSL.*;
 import sql.DB;
 import query.*;
+import query.command.*;
 
 public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bgen(jjtree)*/
   protected JJTXPathState jjtree = new JJTXPathState();
@@ -43,15 +42,17 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
     SelectSelectStep<Record> query = select();
     String document;
     List<String> tablesOrColumns = new ArrayList<String>();
-    List<Where> wheres = new ArrayList<Where>();
-    List<String> expressions = new ArrayList<String>();
+    Stack<Condition> cwheres = new Stack<Condition>();
+    Stack<String> operators = new Stack<String>();
     Where currentWhere;
-    Condition queryWhere;
+    Map<String, Table> tables = new HashMap<String, Table>();
     boolean isDocument = false;
     boolean afterDocument = false;
     boolean isWhere = false;
+    boolean isJoin = false;
       boolean m_isMatchPattern = false;
       boolean isStep = false;
+      boolean afterComparison = false;
 
 	  Stack _elementStack = new Stack();
 
@@ -1668,7 +1669,16 @@ void ForClause()  :
   // todo retrieve tables and columns from tablesOrColumns using sql package and begin making query
   query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
   } (// todo join
-  "," "$" VarName() "in" ExprSingle())*/*@bgen(jjtree)*/
+  {
+  isJoin = true;
+  tablesOrColumns.clear();
+  }
+  "," "$" VarName() "in" ExprSingle() {
+  isDocument = false;afterDocument=false;
+  System.out.println(document);
+  System.out.println(tablesOrColumns);
+  }
+  )*/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -1772,12 +1782,11 @@ void WhereClause()  :
 }
   "where" ExprSingle()/*@bgen(jjtree)*/
   {
-    wheres.add(currentWhere);
     isWhere = false;
-    System.out.println(wheres);
-    System.out.println(expressions);
-    queryWhere = DB.INSTANCE.queryWhere(wheres, expressions);
-    System.out.println(select(field("BOOK.TITLE")).from(table("cda")).where(queryWhere).getSQL(ParamType.INLINED));
+    System.out.println("CWHERES");
+    System.out.println(cwheres);
+    System.out.println(operators);
+    System.out.println(select(field("BOOK.TITLE")).from(table("cda")).where(cwheres.pop()).getSQL(ParamType.INLINED));
   }
   } catch (Throwable jjte000) {
     if (jjtc000) {
@@ -2148,13 +2157,20 @@ void OrExpr()              :
 /*@egen*/
   AndExpr() ("or"{
                 if (isWhere) {
-                    expressions.add("or");
-                    wheres.add(currentWhere);
-                    currentWhere = new Where();
+                    operators.push("or");
                 }
 				binaryTokenStack.push(token);
 			} AndExpr()/*@bgen(jjtree) #OrExpr( 2) */
                 {
+//                cwheres.push(currentWhere.toSQL());
+//                currentWhere = new Where();
+                System.out.println("OR " + cwheres.size());
+                Condition cwhere1 = cwheres.pop();
+                Condition cwhere2 = cwheres.pop();
+                String operator = operators.pop();
+                cwheres.push(DB.INSTANCE.makeCondition(cwhere1, operator, cwhere2));
+                System.out.println(cwheres);
+                System.out.println("/OR " + cwheres.size());
                   SimpleNode jjtn001 = new SimpleNode(this, JJTOREXPR);
                   boolean jjtc001 = true;
                   jjtree.openNodeScope(jjtn001);
@@ -2215,15 +2231,21 @@ void AndExpr()               :
 {/*@bgen(jjtree) #AndExpr(> 1) */
   try {
 /*@egen*/
-  ComparisonExpr() ("and"{
+  ComparisonExpr() {
+  }("and"{
                 if (isWhere) {
-                    expressions.add("and");
-                    wheres.add(currentWhere);
-                    currentWhere = new Where();
+                    operators.push("and");
                 }
 				binaryTokenStack.push(token);
 			} ComparisonExpr()/*@bgen(jjtree) #AndExpr( 2) */
                 {
+                System.out.println("AND " + cwheres.size());
+                Condition cwhere1 = cwheres.pop();
+                Condition cwhere2 = cwheres.pop();
+                String operator = operators.pop();
+                cwheres.push(DB.INSTANCE.makeCondition(cwhere1, operator, cwhere2));
+                System.out.println(cwheres);
+                System.out.println("/AND " + cwheres.size());
                   SimpleNode jjtn001 = new SimpleNode(this, JJTANDEXPR);
                   boolean jjtc001 = true;
                   jjtree.openNodeScope(jjtn001);
@@ -2901,6 +2923,7 @@ void GeneralComp()        :
                 currentWhere.setOperator(">=");
 				binaryTokenStack.push(token);
 			})
+			{afterComparison=true;}
 }
 
 void ValueComp()        :
@@ -3705,15 +3728,28 @@ void Predicate()                  :
 void PrimaryExpr()        :
 {}
 {
-  (Literal() | VarRef() | ParenthesizedExpr() | {isStep=true;}ContextItemExpr() | LOOKAHEAD(2) FunctionCall() | LOOKAHEAD(2) OrderedExpr() | LOOKAHEAD(2) UnorderedExpr() | Constructor())
+  (Literal() {
+    if (isWhere) {
+    try {
+        System.out.println(currentWhere.toSQL());
+        cwheres.push(currentWhere.toSQL());
+        currentWhere = new Where();
+        } catch(Exception e) {
+
+        }
+    }
+  } | VarRef() | ParenthesizedExpr() | {isStep=true;}ContextItemExpr() | LOOKAHEAD(2) FunctionCall() | LOOKAHEAD(2) OrderedExpr() | LOOKAHEAD(2) UnorderedExpr() | Constructor())
 }
 
 void Literal()        :
 {}
 {
   (NumericLiteral() | <StringLiteral>{
-  if (isDocument) { document = token.toString(); document=document.substring(1, document.length() - 1); }
-  if (isWhere) { currentWhere.setValue(token.toString()); }
+  String value = token.toString();
+      value=value.substring(1, value.length() - 1);
+      System.out.println(value + " " + isWhere);
+  if (isDocument) { document = value;  }
+  if (isWhere) { currentWhere.setValue(new Value(value, new StringConvert())); }
   }/*@bgen(jjtree) #StringLiteral( true) */
                                      {
                                        SimpleNode jjtn001 = new SimpleNode(this, JJTSTRINGLITERAL);
@@ -3739,7 +3775,8 @@ void NumericLiteral()        :
 {}
 {
   (<IntegerLiteral>{
-    if (isWhere) currentWhere.setValue(token.toString());
+    String value = token.toString();
+    if (isWhere) currentWhere.setValue(new Value(value, new IntConvert()));
   }/*@bgen(jjtree) #IntegerLiteral( true) */
                    {
                      SimpleNode jjtn001 = new SimpleNode(this, JJTINTEGERLITERAL);
@@ -3758,7 +3795,10 @@ void NumericLiteral()        :
                        jjtree.closeNodeScope(jjtn001,  true);
                      }
                    }
-/*@egen*/ | <DecimalLiteral>/*@bgen(jjtree) #DecimalLiteral( true) */
+/*@egen*/ | <DecimalLiteral>{
+    value = token.toString();
+                                if (isWhere) currentWhere.setValue(new Value(value, new DoubleConvert()));
+                              }/*@bgen(jjtree) #DecimalLiteral( true) */
                                                                                            {
                                                                                              SimpleNode jjtn002 = new SimpleNode(this, JJTDECIMALLITERAL);
                                                                                              boolean jjtc002 = true;
@@ -3776,7 +3816,10 @@ void NumericLiteral()        :
                                                                                                jjtree.closeNodeScope(jjtn002,  true);
                                                                                              }
                                                                                            }
-/*@egen*/ | <DoubleLiteral>/*@bgen(jjtree) #DoubleLiteral( true) */
+/*@egen*/ | <DoubleLiteral>{
+    value = token.toString();
+                               if (isWhere) currentWhere.setValue(new Value(value, new DoubleConvert()));
+                             }/*@bgen(jjtree) #DoubleLiteral( true) */
                                                                                                                                                                   {
                                                                                                                                                                     SimpleNode jjtn003 = new SimpleNode(this, JJTDOUBLELITERAL);
                                                                                                                                                                     boolean jjtc003 = true;
@@ -6570,7 +6613,16 @@ void QName()  :
 /*@egen*/
   (FunctionQName() {
   if (afterDocument) tablesOrColumns.add(token.toString());
-  if (isWhere && isStep) currentWhere.setColumn(new Column(token.toString()));
+  if (isWhere && isStep) {
+    if (afterComparison) {
+        currentWhere.setValue(new Value(token.toString(), new StringConvert()));
+        cwheres.push(currentWhere.toSQL());
+        currentWhere = new Where();
+    }
+    else
+        currentWhere.setColumn(new Column(token.toString()));
+    afterComparison=false;
+  }
   } | "attribute"/*@bgen(jjtree)*/
                                 {
                                   jjtree.closeNodeScope(jjtn000, true);
