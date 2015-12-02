@@ -40,8 +40,10 @@ public class PropertiesHandler {
 			}
  
 			//get the path
-			String DBPath1 = prop.getProperty("DBPath1");
-			String DBPath2 = prop.getProperty("DBPath2");
+			String DBPath1 = System.getProperty("user.dir") + prop.getProperty("DBPath1");
+			String DBPath2 = System.getProperty("user.dir") + prop.getProperty("DBPath2");
+			System.out.println("Working Directory = " +
+		              System.getProperty("user.dir"));
 			
 			//check the path, and put it in DBPath
 			String DBPath = "";			
@@ -75,10 +77,10 @@ public class PropertiesHandler {
 			//TODO
 			NomSQL1 = prop.getProperty("NomSQL1");
 			NomMongo1 = prop.getProperty("NomMongo1");
-			String CleanFiles = prop.getProperty("Clean");
-			Clean = Boolean.parseBoolean(CleanFiles);
-			String KeepCompFile = prop.getProperty("DeleteCompFile");
-			CompileFile = Boolean.parseBoolean(KeepCompFile);
+			int c = Integer.parseInt(prop.getProperty("Clean"));
+			int d = Integer.parseInt(prop.getProperty("KeepCompFile"));
+			Clean = (c == 1.);
+			CompileFile = (d == 1.);
 			
 			//Check the files
 			File f = new File(DBPath + File.separator + file1);

@@ -83,12 +83,13 @@ public class MySQLManager {
                 } 
                 
                 //remove compiling file if didn't exist before
-            	if (remove&&!PropertiesHandler.CompileFile){
+            	if (!PropertiesHandler.CompileFile){
+            		if (remove){
 	        		if(file1.delete()){
 	        			System.out.println("Compilation file " + file1.getName() + " has been deleted!");
 	        		}else{
 	        			System.out.println("Delete operation is failed.");
-	        		} }
+	        		} } }
                 System.out.println("End of request"); 
                 return parseSQLResult(result);
 
@@ -110,7 +111,7 @@ public class MySQLManager {
 			tab[0][i] = temp0[i];
 			//System.out.println("1 " + temp0[i]);
 		}
-		//init données
+		//init donnï¿½es
 		for (int i = 1 ; i < temp.length ; i++){
 			String[] temp1 = temp[i].split("\t");
 			for (int j = 0 ; j < temp1.length ; j++){
@@ -144,7 +145,7 @@ public class MySQLManager {
 			}
 			br.close(); 
 			//ajouter nombase + fichier
-			this.sendMYSQLRequest(file+"m","use " + PropertiesHandler.NomSQL1 + ";\n" + chaine);
+			this.sendMYSQLRequest(file+"m",chaine);
 			
 		} catch (IOException e) {e.printStackTrace();} 
 		return "Error";
@@ -154,7 +155,7 @@ public class MySQLManager {
 		{
 			try 
             { 
-                Process p=Runtime.getRuntime().exec("cmd /C mysql -u root < SQLRequêteExemple.m"); 
+                Process p=Runtime.getRuntime().exec("cmd /C mysql -u root < SQLRequï¿½teExemple.m"); 
                 p.waitFor(); 
                 BufferedReader reader=new BufferedReader(
                     new InputStreamReader(p.getInputStream())
