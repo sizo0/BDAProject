@@ -145,7 +145,7 @@ public class MySQLManager {
 			}
 			br.close(); 
 			//ajouter nombase + fichier
-			this.sendMYSQLRequest(file+"m","use " + PropertiesHandler.NomSQL1 + ";\n" + chaine);
+			this.sendMYSQLRequest(file+"m",chaine);
 			
 		} catch (IOException e) {e.printStackTrace();} 
 		return "Error";

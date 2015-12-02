@@ -3,10 +3,11 @@ CREATE TABLE Formation
 (
 IDFormation mediumint(8)  unsigned NOT NULL,
 Nom varchar(255),
+IDEcole mediumint(8) default NULL,
 PRIMARY KEY (IDFormation)
 );
 
-INSERT INTO `Formation` (`IDFormation`,`Nom`) VALUES (1,"Eu Tellus Industries"),(2,"Urna Foundation"),(3,"Condimentum LLC"),(4,"Imperdiet Ornare In Industries"),(5,"Ac Orci Ut Foundation"),(6,"Auctor Inc."),(7,"Dignissim Lacus Aliquam Inc."),(8,"Consequat Incorporated"),(9,"Ipsum Nunc Id Industries"),(10,"Ac Turpis Incorporated");
+INSERT INTO `Formation` (`IDFormation`,`Nom`,`IDEcole`) VALUES (1,"Eu Tellus Industries",1),(2,"Urna Foundation",2),(3,"Condimentum LLC",3),(4,"Imperdiet Ornare In Industries",3),(5,"Ac Orci Ut Foundation",4),(6,"Auctor Inc.",5),(7,"Dignissim Lacus Aliquam Inc.",6),(8,"Consequat Incorporated",7),(9,"Ipsum Nunc Id Industries",8),(10,"Ac Turpis Incorporated",9);
 
 select * from Formation;
 

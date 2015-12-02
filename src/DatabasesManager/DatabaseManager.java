@@ -92,7 +92,8 @@ public class DatabaseManager {
 	
 	public static void main(String[] args) throws IOException {
 		DatabaseManager dbM = new DatabaseManager();
-		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from DataRow where Prenom = \"Aspen\";"));
+		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where Prenom = \"Aspen\";"));
+		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Formation where Nom = \"Eu Tellus Industries\";"));
 		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));
 		dbM.clear();
 		//L'interface doit appeler Clear quand l'application se ferme pour permettre le nettoyage de base de donn�es
