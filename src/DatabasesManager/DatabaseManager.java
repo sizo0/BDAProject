@@ -3,29 +3,29 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /* Documentation rapide du package:
- * DatabaseManager gère tout le package
- * Path Handler gère le path, et le chargement des fichiers via le fichier properties databasesFiles.properties
- * databasesFiles.properties contient le path des bases de données, les fichiers concernés et leurs types
- * MySQLManager gère les requêtes mySQL via cmd
- * MongoManager gère les requêtes noSQL
+ * DatabaseManager gï¿½re tout le package
+ * Path Handler gï¿½re le path, et le chargement des fichiers via le fichier properties databasesFiles.properties
+ * databasesFiles.properties contient le path des bases de donnï¿½es, les fichiers concernï¿½s et leurs types
+ * MySQLManager gï¿½re les requï¿½tes mySQL via cmd
+ * MongoManager gï¿½re les requï¿½tes noSQL
  * 
  * Pour utiliser le package
  * Actualiser le contenu du fichier databasesFiles.properties
  * Creer un objet DatabaseManager
- * Regarder lignes de printées en cas de problème
- * utiliser sendSQLDatabaseRequest pour envoyer une requête SQL.
- * L'output de la fonction est un String contenant le resultat de la requête.
- * Les requêtes rendent des tableaux de tableaux de String
- * La première ligne contient les types
- * Les lignes suivantes contiennent les données
- * L'Interface graphique doit appeler les méthodes de la classe Main.
+ * Regarder lignes de printï¿½es en cas de problï¿½me
+ * utiliser sendSQLDatabaseRequest pour envoyer une requï¿½te SQL.
+ * L'output de la fonction est un String contenant le resultat de la requï¿½te.
+ * Les requï¿½tes rendent des tableaux de tableaux de String
+ * La premiï¿½re ligne contient les types
+ * Les lignes suivantes contiennent les donnï¿½es
+ * L'Interface graphique doit appeler les mï¿½thodes de la classe Main.
  * 
- * Problèmes possibles et restrictions
- * mysql et mongo ne sont pas dans la variable système path
+ * Problï¿½mes possibles et restrictions
+ * mysql et mongo ne sont pas dans la variable systï¿½me path
  * mysql: root account has a password
- * à chaque saut de ligne pour Mongo, une commande est lancée. Ne pas couper les requêtes avec des sauts de lignes
+ * ï¿½ chaque saut de ligne pour Mongo, une commande est lancï¿½e. Ne pas couper les requï¿½tes avec des sauts de lignes
  * Les tests dans le main de la classe DatabaseManager testent la partie MongoDB et la partie SQL. Il n'y a pas de test sur les
- * retours des fonctions au cas où les fichiers d'entrée sont mauvais.
+ * retours des fonctions au cas oï¿½ les fichiers d'entrï¿½e sont mauvais.
  * Auteur: Dan Seeruttun
  */
 
@@ -92,9 +92,9 @@ public class DatabaseManager {
 	
 	public static void main(String[] args) throws IOException {
 		DatabaseManager dbM = new DatabaseManager();
-		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where Prenom = \"Aspen\";"));
+		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from DataRow where Prenom = \"Aspen\";"));
 		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));
-		dbM.clear(); 
-		//L'interface doit appeler Clear quand l'application se ferme pour permettre le nettoyage de base de données
+		dbM.clear();
+		//L'interface doit appeler Clear quand l'application se ferme pour permettre le nettoyage de base de donnï¿½es
 	}
 }
