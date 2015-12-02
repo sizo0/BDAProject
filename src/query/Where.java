@@ -1,9 +1,6 @@
 package query;
 
 import org.jooq.Condition;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectSelectStep;
 
 import static org.jooq.impl.DSL.field;
 
@@ -13,11 +10,11 @@ import static org.jooq.impl.DSL.field;
 public class Where {
     private Column column;
     private String operator;
-    private String value;
+    private Value value;
 
     public Where() { }
 
-    public Where(Column column, String operator, String value) {
+    public Where(Column column, String operator, Value value) {
         this.column = column;
         this.operator = operator;
         this.value = value;
@@ -39,29 +36,28 @@ public class Where {
         this.operator = operator;
     }
 
-    public String getValue() {
+    public Value getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Value value) {
         this.value = value;
     }
 
     public Condition toSQL() throws Exception {
-        boolean isString = value.charAt(0) == '"' && value.charAt(value.length() - 1) == '\"';
         switch (operator) {
             case "=":
-                return field(column.toString()).eq(isString ? value.substring(1, value.length() - 1) : Double.valueOf(value));
+                return field(column.toString()).eq(value.getValue());
             case "!=":
-                return field(column.toString()).ne(isString ? value.substring(1, value.length() - 1) : Double.valueOf(value));
+                return field(column.toString()).ne(value.getValue());
             case ">=":
-                return field(column.toString()).ge(isString ? value.substring(1, value.length() - 1) : Double.valueOf(value));
+                return field(column.toString()).ge(value.getValue());
             case "<=":
-                return field(column.toString()).le(isString ? value.substring(1, value.length() - 1) : Double.valueOf(value));
+                return field(column.toString()).le(value.getValue());
             case "<":
-                return field(column.toString()).lt(isString ? value.substring(1, value.length() - 1) : Double.valueOf(value));
+                return field(column.toString()).lt(value.getValue());
             case ">":
-                return field(column.toString()).gt(isString ? value.substring(1, value.length() - 1) : Double.valueOf(value));
+                return field(column.toString()).gt(value.getValue());
             default:
                 throw new Exception("Operator: " + operator + " not implemented!");
         }

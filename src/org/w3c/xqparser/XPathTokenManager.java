@@ -7,10 +7,7 @@ import org.jooq.SelectSelectStep;
 import org.w3c.xqparser.Node;
 import org.w3c.xqparser.SimpleNode;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-import java.util.Vector;
+import java.util.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import javax.xml.parsers.*;
@@ -21,6 +18,7 @@ import org.w3c.dom.traversal.TreeWalker;
 import static org.jooq.impl.DSL.*;
 import sql.DB;
 import query.*;
+import query.command.*;
 
 /** Token Manager. */
 public class XPathTokenManager implements XPathConstants

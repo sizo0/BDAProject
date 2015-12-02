@@ -8,6 +8,7 @@ import query.Where;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 public class DB {
@@ -53,30 +54,9 @@ public class DB {
         return query;
     }
 
-    public Condition queryWhere(List<Where> wheres, List<String> operators) {
-        List<Condition> cwheres = wheres.stream()
-                .map(where -> {
-                    try {
-                        return where.toSQL();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }).collect(Collectors.toList());
-        Condition cwhere1 = cwheres.get(0);
-        cwheres.remove(0);
-
-        final int[] i = {0};
-        return cwheres.stream()
-                .reduce(cwhere1,
-                        (cwhere, acc) -> {
-                            Condition c;
-                            if (operators.get(i[0]).equals("and"))
-                                c = acc.and(cwhere);
-                            else
-                                c = acc.or(cwhere);
-                            i[0]++;
-                            return c;
-                        });
+    public Condition makeCondition(Condition cwhere1, String operator, Condition cwhere2) {
+        if (operator.equals("and"))
+            return cwhere2.and(cwhere1);
+        return cwhere2.or(cwhere1);
     }
 }
