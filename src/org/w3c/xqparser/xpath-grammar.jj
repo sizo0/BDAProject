@@ -45,11 +45,14 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
     Stack<Condition> cwheres = new Stack<Condition>();
     Stack<String> operators = new Stack<String>();
     Where currentWhere;
+    Map<String, Table> tables = new HashMap<String, Table>();
     boolean isDocument = false;
     boolean afterDocument = false;
     boolean isWhere = false;
+    boolean isJoin = false;
       boolean m_isMatchPattern = false;
       boolean isStep = false;
+      boolean afterComparison = false;
 
 	  Stack _elementStack = new Stack();
 
@@ -1666,7 +1669,16 @@ void ForClause()  :
   // todo retrieve tables and columns from tablesOrColumns using sql package and begin making query
   query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
   } (// todo join
-  "," "$" VarName() "in" ExprSingle())*/*@bgen(jjtree)*/
+  {
+  isJoin = true;
+  tablesOrColumns.clear();
+  }
+  "," "$" VarName() "in" ExprSingle() {
+  isDocument = false;afterDocument=false;
+  System.out.println(document);
+  System.out.println(tablesOrColumns);
+  }
+  )*/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -2911,6 +2923,7 @@ void GeneralComp()        :
                 currentWhere.setOperator(">=");
 				binaryTokenStack.push(token);
 			})
+			{afterComparison=true;}
 }
 
 void ValueComp()        :
@@ -6600,7 +6613,16 @@ void QName()  :
 /*@egen*/
   (FunctionQName() {
   if (afterDocument) tablesOrColumns.add(token.toString());
-  if (isWhere && isStep) currentWhere.setColumn(new Column(token.toString()));
+  if (isWhere && isStep) {
+    if (afterComparison) {
+        currentWhere.setValue(new Value(token.toString(), new StringConvert()));
+        cwheres.push(currentWhere.toSQL());
+        currentWhere = new Where();
+    }
+    else
+        currentWhere.setColumn(new Column(token.toString()));
+    afterComparison=false;
+  }
   } | "attribute"/*@bgen(jjtree)*/
                                 {
                                   jjtree.closeNodeScope(jjtn000, true);
