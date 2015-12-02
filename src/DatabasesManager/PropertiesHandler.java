@@ -67,9 +67,9 @@ public class PropertiesHandler {
 			String file2 = prop.getProperty("file2");
 			int type2 = Integer.parseInt(prop.getProperty("type2"));
 			String file3 = prop.getProperty("file3");
-			int type3 = Integer.parseInt(prop.getProperty("type3"));
+			int type3 = Integer.parseInt(prop.getProperty("type3"));/*
 			String file4 = prop.getProperty("file4");
-			int type4 = Integer.parseInt(prop.getProperty("type4"));
+			int type4 = Integer.parseInt(prop.getProperty("type4"));*/
 			
 			//get the user properties
 			//TODO
@@ -114,7 +114,7 @@ public class PropertiesHandler {
 			} else {
 				System.out.println(file3 + " is not found");
 			}
-			
+			/*
 			f = new File(DBPath + File.separator + file4);
 			if(f.exists() && !f.isDirectory()) { 
 				if (list.containsKey(type3)){
@@ -126,7 +126,7 @@ public class PropertiesHandler {
 				System.out.println(file4 + " successfully added");
 			} else {
 				System.out.println(file4 + " is not found");
-			}
+			}*/
 		} catch (Exception e) {
 			System.out.println("Exception: " + e);
 		} finally {
