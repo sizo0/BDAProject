@@ -1,6 +1,6 @@
 package query;
 
-import com.sun.deploy.util.StringUtils;
+//import com.sun.deploy.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class Select extends Query {
     }
 
     public String toString() {
-        String stringColumns = columns.size() == 0 ? "*" : StringUtils.join(columns, ",");
+ //       String stringColumns = columns.size() == 0 ? "*" : StringUtils.join(columns, ",");
 //        return "Select " + stringColumns +
         return "";
     }
