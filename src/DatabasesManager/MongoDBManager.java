@@ -128,12 +128,13 @@ public class MongoDBManager {
             } 
             
             //remove compiling file if didn't exist before
-        	if (remove&&!PropertiesHandler.CompileFile){
+        	if (!PropertiesHandler.CompileFile){
+        		if (remove) {
         		if(file1.delete()){
         			System.out.println("Compilation file " + file1.getName() + " has been deleted!");
         		}else{
         			System.out.println("Delete operation is failed.");
-        		} }
+        		} } }
             System.out.println("End of request"); 
             return this.parseMongoResult(result);
 
@@ -155,7 +156,7 @@ public class MongoDBManager {
 			String[][] tab = new String[nbLignes][nbAttributs];
 			int cpt = 0;
 			int cpt2 = 0;
-			//attributs et première ligne
+			//attributs et premiï¿½re ligne
 			for (int i = 1 ; i < temp1.length ; i+=2){
 				if ((i+1) % 4 == 0){
 					tab[1][cpt++] = temp1[i];
