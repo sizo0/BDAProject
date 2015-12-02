@@ -7,16 +7,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class MongoManager {
+public class MongoDBManager {
 
 	static String path;
 	static ArrayList<String> files;
 	
-	public MongoManager(String path0, String files0){
+	public MongoDBManager(String path0, String files0){
 		path = path0;
 		files = new ArrayList<String>();
-		String[] temp = files0.split(PathHandler.SEPARATOR);
+		String[] temp = files0.split(PropertiesHandler.SEPARATOR);
 		for (int i = 0 ; i < temp.length ; i++){
 			files.add(temp[i]);
 		}
@@ -52,7 +53,7 @@ public class MongoManager {
 				String[] temp = s.split("\\.");
 				Process p=Runtime.getRuntime().exec("mongo --eval db." + temp[0] + ".drop()"); 
 			}
-			System.out.println("Mongo databases cleared");
+			System.out.println("Mongo database " + PropertiesHandler.NomMongo1 + " cleared");
         }
 		catch(IOException e1) {System.out.println("clear for Mongo NOK " + e1);} 
 			
@@ -68,7 +69,7 @@ public class MongoManager {
 			Process p=Runtime.getRuntime().exec("mongo --eval db." + temp[0] + ".drop()"); 
             p.waitFor(); 
 			//send the request
-            p=Runtime.getRuntime().exec("mongoimport --db test --collection " + temp[0] + " --drop --file  Databases\\" + file); 
+            p=Runtime.getRuntime().exec("mongoimport --db " + PropertiesHandler.NomMongo1 +  " --collection " + temp[0] + " --drop --file  Databases\\" + file); 
             p.waitFor(); 
             BufferedReader reader=new BufferedReader(
                 new InputStreamReader(p.getInputStream())
@@ -85,17 +86,12 @@ public class MongoManager {
 		return result;
 	}
 	
-	public String sendMongoRequest(String request) throws IOException{
-		//cas où plusieurs commandes sont envoyées
-		String[] temp = request.split("\n");
-		String result = "";
-		for (int i = 0 ; i < temp.length ; i++){
-			result += sendMongoRequest("Mongo.m",request) + "\n";
-		}
-		return result;
+	public String[][] sendMongoRequest(String request) throws IOException{
+		System.out.println("Executing Query :" + request);
+			return sendMongoRequest("Mongo.m",request);
 	}
 	
-	public String sendMongoRequest(String file, String request) throws IOException{
+	public String[][] sendMongoRequest(String file, String request) throws IOException{
 
 		String result = "";
 		//formating command
@@ -120,7 +116,7 @@ public class MongoManager {
 			System.out.println("Compilation file in Mongo command created");
 			
 			//sending command
-			Process p=Runtime.getRuntime().exec("cmd /C mongo test "+ file); 
+			Process p=Runtime.getRuntime().exec("cmd /C mongo " + PropertiesHandler.NomMongo1 + " " + file); 
             p.waitFor(); 
             BufferedReader reader=new BufferedReader(
                 new InputStreamReader(p.getInputStream())
@@ -132,20 +128,54 @@ public class MongoManager {
             } 
             
             //remove compiling file if didn't exist before
-        	if (remove){
+        	if (remove&&!PropertiesHandler.CompileFile){
         		if(file1.delete()){
         			System.out.println("Compilation file " + file1.getName() + " has been deleted!");
         		}else{
         			System.out.println("Delete operation is failed.");
         		} }
             System.out.println("End of request"); 
-            return result;
+            return this.parseMongoResult(result);
 
 		} catch (IOException e) {e.printStackTrace();}
         catch(InterruptedException e2) {System.out.println("Fail to launch mysql command");} 
-		return "Error";
+		return null;
 		}
 	
+	private String[][] parseMongoResult(String result) {
+		//System.out.println(result);
+			String[] temp = result.split("\\{");
+			if (temp.length <= 1){
+				return null;
+			}
+			String[] temp1 = temp[1].split("\"");
+			//temp[0] est le message de MongoDB
+			int nbLignes = temp.length;
+			int nbAttributs = temp1.length/4;
+			String[][] tab = new String[nbLignes][nbAttributs];
+			int cpt = 0;
+			int cpt2 = 0;
+			//attributs et première ligne
+			for (int i = 1 ; i < temp1.length ; i+=2){
+				if ((i+1) % 4 == 0){
+					tab[1][cpt++] = temp1[i];
+				} else {
+					tab[0][cpt2++] = temp1[i];
+				}
+			}
+			//reste des lignes
+			for (int i = 2 ; i < nbLignes ; i++){
+				cpt = 0;
+				temp1 = temp[i].split("\"");
+				for (int j = 1 ; j < temp1.length ; j+=2){
+					if ((j+1) % 4 == 0){
+						tab[i][cpt++] = temp1[j];
+					}
+				}
+			}
+		return tab;
+	}
+
 	public static void test(){
 		try 
         { 
@@ -166,11 +196,4 @@ public class MongoManager {
 
         System.out.println("Test OK"); 
     } 
-	
-	public static void main(String[] args) throws IOException {
-		//System.out.println(importMongo("EcoleMongoDB.txt"));
-		//System.out.println(sendMongoRequest("db.EcoleMongoDB.find()"));
-		//System.out.println(sendMongoRequest("db.EcoleMongoDB.find()\ndb.EcoleMongoDB.find()"));
-	}
-
 }

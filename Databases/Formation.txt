@@ -1,4 +1,3 @@
-use y;
 DROP TABLE IF EXISTS Formation;
 CREATE TABLE Formation
 (

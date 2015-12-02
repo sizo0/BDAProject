@@ -15,7 +15,10 @@ import java.util.HashMap;
  * Regarder lignes de printées en cas de problème
  * utiliser sendSQLDatabaseRequest pour envoyer une requête SQL.
  * L'output de la fonction est un String contenant le resultat de la requête.
- * Le format est souvent moche
+ * Les requêtes rendent des tableaux de tableaux de String
+ * La première ligne contient les types
+ * Les lignes suivantes contiennent les données
+ * L'Interface graphique doit appeler les méthodes de la classe Main.
  * 
  * Problèmes possibles et restrictions
  * mysql et mongo ne sont pas dans la variable système path
@@ -30,7 +33,7 @@ public class DatabaseManager {
 
 	static HashMap<Integer,String> data;
 	static MySQLManager mysql;
-	static MongoManager mongo;
+	static MongoDBManager mongo;
 	
 	public DatabaseManager() throws IOException{
 		//getting data from configuration file
@@ -46,33 +49,52 @@ public class DatabaseManager {
 
 		//setting up for mongo
 		System.out.println("Init MongoManager");
-		mongo = new MongoManager(data.get(0), data.get(2));
+		mongo = new MongoDBManager(data.get(0), data.get(2));
 		System.out.println("Init Mongo databases files");
 		mongo.initConnection();
 	}
 	
-	public String sendSQLDatabaseRequest(String request) throws IOException{
+	public String[][] sendSQLDatabaseRequest(String request) throws IOException{
 		return mysql.sendMYSQLRequest(request);
 	}
 	
-	public String sendMongoRequest(String request) throws IOException{
+	public String[][] sendMongoRequest(String request) throws IOException{
 		return mongo.sendMongoRequest(request);
 	}
 
 	public void getData() throws IOException{
-		PathHandler properties = new PathHandler();
+		PropertiesHandler properties = new PropertiesHandler();
 		data = properties.getPropValues();
 	}
 	
 	public void clear() throws IOException{
+		if (PropertiesHandler.Clean){
 		mysql.clear();
 		mongo.clear();
+		}
+	}
+	
+	public void print2DimTableInConsole(String[][] tab)
+	{
+		if (tab == null){
+			System.out.println("No answer");
+			return;
+		}
+	   for(int i = 0; i < tab.length; i++)
+	   {
+	      for(int j = 0; j < tab[i].length; j++)
+	      {
+	         System.out.print(tab[i][j] + " ");
+	      }
+	      System.out.println();
+	   }
 	}
 	
 	public static void main(String[] args) throws IOException {
 		DatabaseManager dbM = new DatabaseManager();
-		System.out.println(dbM.sendSQLDatabaseRequest("select * from Liaison;"));
-		System.out.println(dbM.sendMongoRequest("db.EcoleMongoDB.find()"));
-		dbM.clear();
+		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where Prenom = \"Aspen\";"));
+		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));
+		dbM.clear(); 
+		//L'interface doit appeler Clear quand l'application se ferme pour permettre le nettoyage de base de données
 	}
 }

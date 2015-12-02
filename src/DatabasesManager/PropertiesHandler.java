@@ -11,13 +11,17 @@ import java.util.Properties;
  * 
  */
  
-public class PathHandler {
+public class PropertiesHandler {
 	String result = "";
 	InputStream inputStream;
 	 final static int PATHCST = 0;
 	 final static int MYSQLFILE = 1;
 	 final static int MONGODBFILE = 2;
 	 final static String SEPARATOR = "&&&";
+	 static Boolean CompileFile;
+	 static Boolean Clean;
+	 static String NomSQL1;
+	 static String NomMongo1;
 	
 	public HashMap<Integer,String> getPropValues() throws IOException {
 		HashMap<Integer,String> list = new HashMap<Integer,String>();
@@ -25,7 +29,7 @@ public class PathHandler {
 		try {
 			Properties prop = new Properties();
 			String path = "DatabasesManager/";
-			String propFileName = path + "databasesFiles.properties";
+			String propFileName = path + "databaseFiles.properties";
  
 			inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
  
@@ -66,7 +70,16 @@ public class PathHandler {
 			int type3 = Integer.parseInt(prop.getProperty("type3"));
 			String file4 = prop.getProperty("file4");
 			int type4 = Integer.parseInt(prop.getProperty("type4"));
- 
+			
+			//get the user properties
+			//TODO
+			NomSQL1 = prop.getProperty("NomSQL1");
+			NomMongo1 = prop.getProperty("NomMongo1");
+			String CleanFiles = prop.getProperty("Clean");
+			Clean = Boolean.parseBoolean(CleanFiles);
+			String KeepCompFile = prop.getProperty("DeleteCompFile");
+			CompileFile = Boolean.parseBoolean(KeepCompFile);
+			
 			//Check the files
 			File f = new File(DBPath + File.separator + file1);
 			if(f.exists() && !f.isDirectory()) { 

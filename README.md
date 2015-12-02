@@ -19,3 +19,26 @@ Dossier Documents\Presentation\presentation1.odt
 
 **Rapport Overleaf :**
 https://www.overleaf.com/3740559stsxny#/10713357/
+
+Contenu des bases de données.
+Données à reformater en cas de test !
+MongoDB:
+- EcoleMongoDB
+  - IdEcole key
+  - Nom
+
+SQL:
+- Formation
+  - IDFormation key
+  - Nom
+  
+- Personne
+  - id key
+  - Nom
+  - Prenom
+  - IDFormation foreign key
+  - IDEcole
+  
+- Liaison
+  - IDFormation
+  - IDEcole
