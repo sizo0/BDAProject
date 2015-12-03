@@ -12,6 +12,7 @@
 
 package org.w3c.xqparser;
 
+import java.nio.charset.StandardCharsets;
 import org.jooq.conf.ParamType;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -99,8 +100,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
 		
 
 
-		  public static void main(String args[])
-		     throws Exception
+		  public XPath(String xquery)
 		  {
 //          EXAMPLE
 //        String sqlexample = select(field("BOOK.TITLE")).select(field("AUTHOR.FIRST_NAME"), field("AUTHOR.LAST_NAME"))
@@ -110,221 +110,11 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
 //                .where(field("BOOK.PUBLISHED_IN").equal(1948))
 //                .getSQL(ParamType.INLINED);
 //        System.out.println(sqlexample);
-        int numberArgsLeft = args.length;
-        int argsStart = 0;
-        boolean isMatchParser = false;
-        boolean dumpTree = false;
-        while (numberArgsLeft > 0) {
-            try {
+            this(new ByteArrayInputStream(xquery.getBytes(StandardCharsets.UTF_8)));
+            // usage
+            // this.parse()
 
-                if (args[argsStart].equals("-dumptree")) {
-                    dumpTree = true;
-                    argsStart++;
-                    numberArgsLeft--;
-                }
-                else if (args[argsStart].equals("-match")) {
-                    isMatchParser = true;
-                    System.out.println("Match Pattern Parser");
-                    argsStart++;
-                    numberArgsLeft--;
-                } else if ("-file".equalsIgnoreCase(args[argsStart])) {
-                    argsStart++;
-                    numberArgsLeft--;
-                    System.out.println("Running test for: " + args[argsStart]);
-                    File file = new File(args[argsStart]);
-                    argsStart++;
-                    numberArgsLeft--;
-                    Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-                    XPath parser = new XPath(fis);
-                    SelectJoinStep<Record> query = parser.XPath2();
-                    if (dumpTree)
-                        System.out.println(query.getSQL());
-                } else if (args[argsStart].endsWith(".xquery")) {
-                    System.out.println("Running test for: " + args[argsStart]);
-                    File file = new File(args[argsStart]);
-                    argsStart++;
-                    numberArgsLeft--;
-                    Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-                    XPath parser = new XPath(fis);
-                    SelectJoinStep<Record> query = parser.XPath2();
-                    if (dumpTree)
-                        System.out.println(query.getSQL());
-                }         else if ("-catalog".equalsIgnoreCase(args[argsStart])) {
-                    argsStart++;
-                    numberArgsLeft--;
-                    String catalogFileName = args[argsStart];
-                    argsStart++;
-                    numberArgsLeft--;
-                    System.out.println("Running catalog for: "
-                            + catalogFileName);
-                    DocumentBuilderFactory dbf = DocumentBuilderFactory
-                            .newInstance();
-                    DocumentBuilder db = dbf.newDocumentBuilder();
-                    Document doc = db.parse(catalogFileName);
-
-                    NodeIterator testCases = ((DocumentTraversal) doc)
-                            .createNodeIterator(doc, NodeFilter.SHOW_ELEMENT,
-                                    new NodeFilter() {
-                                        public short acceptNode(
-                                                org.w3c.dom.Node node) {
-                                            String nm = node.getNodeName();
-                                            return (nm.equals("test-case")) ? NodeFilter.FILTER_ACCEPT
-                                                    : NodeFilter.FILTER_SKIP;
-                                        }
-                                    }, true);
-                    org.w3c.dom.Element testCase;
-                    int totalCount = 0;
-                    Vector failedList = new Vector();
-                    while ((testCase = (org.w3c.dom.Element) testCases
-                            .nextNode()) != null) {
-                        NodeIterator queryies = ((DocumentTraversal) doc)
-                                .createNodeIterator(testCase,
-                                        NodeFilter.SHOW_ELEMENT,
-                                        new NodeFilter() {
-                                            public short acceptNode(
-                                                    org.w3c.dom.Node node) {
-                                                String nm = node.getNodeName();
-                                                return (nm.equals("query")) ? NodeFilter.FILTER_ACCEPT
-                                                        : NodeFilter.FILTER_SKIP;
-                                            }
-                                        }, true);
-                        org.w3c.dom.Element query;
-                        while ((query = (org.w3c.dom.Element) queryies
-                                .nextNode()) != null) {
-                            String fileString = query.getAttribute("name");
-                            String locString = testCase
-                                    .getAttribute("FilePath").replace('/',
-                                            File.separatorChar);
-                            File catFile = new File(catalogFileName);
-                            String locCatFile = catFile.getParent();
-                            String absFileName = locCatFile + File.separator
-                                    + "Queries" + File.separator + "XQuery"
-                                    + File.separator + locString + fileString;
-
-                            if (dumpTree) {
-                                System.out.print("== ");
-                                System.out.print(absFileName);
-                                System.out.println(" ==");
-                            } else
-                                System.out.print(".");
-
-                            boolean isParseError = false;
-                            String scenario = testCase.getAttribute("scenario");
-                            if (scenario.equals("parse-error"))
-                                isParseError = true;
-
-                            totalCount++;
-
-                            try {
-                                File file = new File(absFileName);
-                                Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-                                XPath parser = new XPath(fis);
-                                SelectJoinStep<Record> q = parser.XPath2();
-                                if(isParseError)
-                                    failedList.addElement(fileString);
-                                if (dumpTree)
-                                    System.out.println(q.getSQL());
-                            } catch (Exception e) {
-                                if(!isParseError)
-                                    failedList.addElement(fileString);
-                            } catch (Error e2) {
-                                if(!isParseError)
-                                    failedList.addElement(fileString);
-                            }
-
-                        }
-
-                    }
-                    System.out.println();
-                    if(failedList.size() > 0)
-                    {
-                        System.out.print("FAILED: ");
-                        for(int i = 0; i < failedList.size(); i++)
-                        {
-                            String fname = (String)failedList.elementAt(i);
-                            System.out.print(fname);
-                            if((i+1) != failedList.size())
-                                System.out.print(", ");
-                        }
-                        System.out.println();
-                        System.out.print("Failed "+failedList.size()+" out of ");
-                    }
-                    else
-                    {
-                        System.out.print("Total Success!! ");
-                    }
-                    System.out.println(totalCount+" cases");
-
-                }
-
-        else
-        {
-				for(int i = argsStart; i < args.length; i++)
-				{
-					System.out.println();
-					System.out.println("Test["+i+"]: "+args[i]);
-          Reader fis = new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(args[i]), "UTF-8"));
-					XPath parser = new XPath(fis);
-          SimpleNode tree;
-          SelectJoinStep<Record> query;
-          if(isMatchParser)
-          {
-					query = parser.XPath2();
-          }
-          else
-          {
-					query = parser.XPath2();
-          }
-                System.out.println(query.getSQL());
-          break;
-				}
-				System.out.println("Success!!!!");
-        }
-			}
-			catch(ParseException pe)
-			{
-				System.err.println(pe.getMessage());
-			}
-			  catch(Error e)
-			  {
-				  String msg = e.getMessage();
-				  if(msg == null || msg.equals(""))
-					  msg = "Unknown Error: "+e.getClass().getName();
-			  	System.err.println(msg);
-			  }
-			return;
-		   }
-		    java.io.DataInputStream dinput = new java.io.DataInputStream(System.in);
-		    while(true)
-		    {
-			  try
-			  {
-			      System.err.println("Type Expression: ");
-			      String input =  dinput.readLine();
-			      if(null == input || input.trim().length() == 0)
-			        break;
-			      XPath parser = new XPath(new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(input), "UTF-8")));
-					SelectJoinStep<Record> query = parser.XPath2();
-//			      ((SimpleNode)tree.jjtGetChild(0)).dump("|") ;
-                System.out.println(query.getSQL(ParamType.INLINED));
-			  }
-			  catch(ParseException pe)
-			  {
-			  	System.err.println(pe.getMessage());
-			  }
-			  catch(Exception e)
-			  {
-			  	System.err.println(e.getMessage());
-			  }
-			  catch(Error e)
-			  {
-				  String msg = e.getMessage();
-				  if(msg == null || msg.equals(""))
-					  msg = "Unknown Error: "+e.getClass().getName();
-			  	System.err.println(msg);
-			  }
-		    }
-		  }
+		}
 		}
 
     PARSER_END(XPath)
