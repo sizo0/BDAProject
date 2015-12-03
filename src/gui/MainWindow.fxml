@@ -8,18 +8,18 @@
 
 <BorderPane prefHeight="500.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane tabClosingPolicy="UNAVAILABLE" tabMinHeight="28.0" tabMinWidth="100.0" BorderPane.alignment="CENTER">
         <tabs>
           <Tab text="Input">
                <content>
-                  <VBox prefHeight="200.0" prefWidth="100.0">
+                  <VBox>
                      <children>
                         <TitledPane animated="false" collapsible="false" prefHeight="150.0" text="Interface">
                            <content>
                               <FlowPane hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="10.0">
                                  <children>
-                                    <TextField prefWidth="300.0" promptText="Your xQuery..." fx:id="originalXQuery" />
-                                    <Button fx:id="executeQuery" mnemonicParsing="false" prefWidth="80.0" text="Execute" />
+                                    <ChoiceBox fx:id="originalXQuery" prefWidth="300.0" />
+                                    <Button fx:id="executeOriginalQuery" mnemonicParsing="false" prefWidth="80.0" text="Execute" />
                                  </children>
                                  <padding>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -31,8 +31,32 @@
                            <content>
                               <SplitPane dividerPositions="0.5">
                                  <items>
-                                    <TextField promptText="Splitted xQuery for MySQL Database" fx:id="mysqlXQuery" />
-                                    <TextField promptText="Splitted xQuery for Mongo Database" fx:id="mongoXQuery" />
+                                    <BorderPane prefHeight="200.0" prefWidth="200.0">
+                                       <center>
+                                          <FlowPane hgap="10.0" maxHeight="-Infinity" vgap="10.0" BorderPane.alignment="CENTER">
+                                             <padding>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </padding>
+                                             <children>
+                                                <TextField fx:id="mysqlXQuery" prefWidth="240.0" promptText="Splitted xQuery for MySQL Database" />
+                                                <Button fx:id="executeMysqlXQuery" mnemonicParsing="false" prefWidth="80.0" text="Execute" />
+                                             </children>
+                                          </FlowPane>
+                                       </center>
+                                    </BorderPane>
+                                    <BorderPane prefHeight="200.0" prefWidth="200.0">
+                                       <center>
+                                          <FlowPane hgap="10.0" maxHeight="-Infinity" vgap="10.0" BorderPane.alignment="CENTER">
+                                             <padding>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </padding>
+                                             <children>
+                                                <TextField fx:id="mongoXQuery" prefWidth="240.0" promptText="Splitted xQuery for Mongo Database" />
+                                                <Button fx:id="executeMongoXQuery" mnemonicParsing="false" prefWidth="80.0" text="Execute" />
+                                             </children>
+                                          </FlowPane>
+                                       </center>
+                                    </BorderPane>
                                  </items>
                               </SplitPane>
                            </content>
@@ -41,12 +65,20 @@
                            <items>
                               <TitledPane animated="false" collapsible="false" prefHeight="150.0" text="MySQL Wrapper">
                                  <content>
-                                    <TextField promptText="Generated MySQL Query" fx:id="mysqlQuery" />
+                                    <BorderPane>
+                                       <center>
+                                          <TextField fx:id="mysqlQuery" minWidth="240.0" promptText="Generated MySQL Query" BorderPane.alignment="CENTER" />
+                                       </center>
+                                    </BorderPane>
                                  </content>
                               </TitledPane>
                               <TitledPane animated="false" collapsible="false" prefHeight="150.0" text="MongoDB Wrapper">
                                  <content>
-                                    <TextField promptText="Generated MongoDB Query" fx:id="mongoQuery" />
+                                    <BorderPane>
+                                       <center>
+                                          <TextField fx:id="mongoQuery" minWidth="240.0" promptText="Generated MongoDB Query" BorderPane.alignment="CENTER" />
+                                       </center>
+                                    </BorderPane>
                                  </content>
                               </TitledPane>
                            </items>

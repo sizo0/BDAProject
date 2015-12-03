@@ -11,35 +11,34 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.util.Callback;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
+import javafx.util.Pair;
 import org.jooq.conf.ParamType;
 import org.w3c.xqparser.ParseException;
 import org.w3c.xqparser.XPath;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.ResourceBundle;
-import java.util.Vector;
+import java.util.*;
 
 public class MainWindowController implements Initializable {
 
     @FXML
-    private TextField originalXQuery;
+    private ChoiceBox originalXQuery;
 
     @FXML
-    private Button executeQuery;
+    private Button executeOriginalQuery;
 
     @FXML
     private TextField mysqlXQuery;
 
     @FXML
+    private Button executeMysqlXQuery;
+
+    @FXML
     private TextField mongoXQuery;
+
+    @FXML
+    private Button executeMongoXQuery;
 
     @FXML
     private TextField mysqlQuery;
@@ -56,9 +55,13 @@ public class MainWindowController implements Initializable {
     @FXML
     private TableView finalTable;
 
+    private enum ComputeMode { ALL, MYSQL, MONGO };
     private final DatabaseInitializer dbM;
     private final MySQLManager mysql;
     private final MongoDBManager mongo;
+
+    private ArrayList<String> queries = new ArrayList<String>();
+    private Map<String, Pair<String, String>> queriesSplits = new HashMap<String, Pair<String, String>>();
 
     public MainWindowController(DatabaseInitializer dbM) {
         this.dbM = dbM;
@@ -68,52 +71,125 @@ public class MainWindowController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        executeQuery.setOnAction(event -> {
-            try {
-                // Recovers the original xQuery
-                String xQuery = originalXQuery.getText();//"for $a in document(\"personnes\")//formations where $a//nom = \"Dupont\" return $a";
 
-                // Splits the original xQuery into queries for each Database
-                mysqlXQuery.setText("for $a in document(\"personne\")//formation return $a");
-                String xQueryForMysql = mysqlXQuery.getText();
-                mongoXQuery.setText("for $a in document(\"ecole\") return $a");
-                String xQueryForMongo = mongoXQuery.getText();
+        queries.add(
+            "for $a in document(\"personne\")//formation, $b in document(\"ecole\") where $a/IDEcole = $b/IdEcole return $a, $b"
+        );
+        queriesSplits.put(queries.get(0), new Pair<String, String>(
+            "for $a in document(\"personne\")//formation return $a",
+            "for $b in document(\"ecole\")//ecole return $b"
+        ));
 
-                // Converts xQuery for MySQL Database to SQL Query
-                //String mysqlQuery = "select * from Personne where Prenom = \"Aspen\"";
-                //String mysqlQuery = "select * from Personne join Formation on Personne.IDFormation = Formation.IDFormation";
+        queries.add(
+            "for $a in document(\"personne\")//personne where $a/prenom = \"Aspen\" return $a"
+        );
+        queriesSplits.put(queries.get(1), new Pair<String, String>(
+            "for $a in document(\"personne\")//personne where $a/prenom = \"Aspen\" return $a",
+            ""
+        ));
+
+        queries.add(
+            "for $a in document(\"ecole\")//Nom where $a = \"INSA de Rennes\" return $a"
+        );
+        queriesSplits.put(queries.get(2), new Pair<String, String>(
+            "",
+            "for $a in document(\"ecole\")//Nom where $a = \"INSA de Rennes\" return $a"
+        ));
+
+        queries.add(
+            "for $a in document(\"personne\")//personne where $a/nom = \"Macias\", $b in document(\"ecole\") where $a/IDEcole = $b/IdEcole return $a, $b"
+        );
+        queriesSplits.put(queries.get(3), new Pair<String, String>(
+            "for $a in document(\"personne\")//personne where $a/nom = \"Macias\" return $a",
+            "for $b in document(\"ecole\")//ecole return $b"
+        ));
+
+        originalXQuery.setItems(FXCollections.observableArrayList(queries));
+
+        executeOriginalQuery.setOnAction(event -> { compute(ComputeMode.ALL); });
+        executeMysqlXQuery.setOnAction(event -> { compute(ComputeMode.MYSQL); });
+        executeMongoXQuery.setOnAction(event -> { compute(ComputeMode.MONGO); });
+    }
+
+    public void compute(ComputeMode mode) {
+        try {
+            // Recovers the original xQuery
+            String xQuery = (String)originalXQuery.getValue();
+            if(xQuery == null && mode == ComputeMode.ALL) {
+                return;
+            }
+
+            // Splits the original xQuery into queries for each Database
+            if(mode == ComputeMode.ALL) {
+                mysqlXQuery.setText(queriesSplits.get(xQuery).getKey());
+                mongoXQuery.setText(queriesSplits.get(xQuery).getValue());
+            }
+            else if(mode == ComputeMode.MYSQL) {
+                mongoXQuery.setText("");
+            }
+            else if(mode == ComputeMode.MONGO) {
+                mysqlXQuery.setText("");
+            }
+            String xQueryForMysql = mysqlXQuery.getText();
+            String xQueryForMongo = mongoXQuery.getText();
+
+
+            // Converts xQuery for MySQL Database to SQL Query
+            String mysqlQuery = "";
+            if(xQueryForMysql.length() > 0) {
                 XPath mysqlParser = new XPath(xQueryForMysql);
-                String mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
-                this.mysqlQuery.setText(mysqlQuery);
+                mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
+            }
+            this.mysqlQuery.setText(mysqlQuery);
 
-                // Converts xQuery for Mongo Database to Mongo Query
-                //String mongoQuery = "db.EcoleMongoDB.find({IdEcole:\"5\"})";
-                String mongoQuery = "db.EcoleMongoDB.find()";
-                //XPath monogParser = new XPath(xQueryForMongo);
+            // Converts xQuery for Mongo Database to Mongo Query
+            String mongoQuery = "";
+            if(xQueryForMongo.length() > 0) {
+                // TODO: REMOVE HARD CODED MONGO QUERY, utiliser XPath une fois fait
+                if(xQuery.equals(queries.get(0)) || xQuery.equals(queries.get(3))) {
+                    mongoQuery = "db.EcoleMongoDB.find()";
+                }
+                else if(xQuery.equals(queries.get(2))) {
+                    mongoQuery = "db.EcoleMongoDB.find({Nom: \"INSA de Rennes\"})";
+                }
+                //XPath mongoParser = new XPath(xQueryForMongo);
                 //String mongoQuery = monogParser.XPath2().getMongo(ParamType.INLINED);
-                this.mongoQuery.setText(mongoQuery);
+            }
+            this.mongoQuery.setText(mongoQuery);
 
-                // Executes the queries on each Database
-                String[][] mysqlRes = mysql.sendMYSQLRequest(mysqlQuery);
-                String[][] mongoRes = mongo.sendMongoRequest(mongoQuery);
+            // Executes the queries on each Database
+            String[][] mysqlRes = null;
+            String[][] mongoRes = null;
+            if(mysqlQuery.length() > 0) {
+                mysqlRes = mysql.sendMYSQLRequest(mysqlQuery);
+            }
+            if(mongoQuery.length() > 0) {
+                mongoRes = mongo.sendMongoRequest(mongoQuery);
+            }
 
-                // Joins the two results into one
-                int indexIdEcoleForPersonne = 0;
+            // Joins the two results into one
+            int indexIdEcoleForPersonne = -1;
+            if(mysqlRes != null) {
                 for(int i = 0; i < mysqlRes[0].length; i++) {
                     if(mysqlRes[0][i].equals("IDEcole")) {
                         indexIdEcoleForPersonne = i;
                         break;
                     }
                 }
-                int indexIdEcoleForEcole = 0;
+            }
+            int indexIdEcoleForEcole = -1;
+            if(mongoRes != null) {
                 for(int i = 0; i < mongoRes[0].length; i++) {
                     if(mongoRes[0][i].equals("IdEcole")) {
                         indexIdEcoleForEcole = i;
                         break;
                     }
                 }
+            }
 
-                String[][] finalRes = new String[mysqlRes.length][];
+            String[][] finalRes = null;
+            if(indexIdEcoleForEcole != -1 && indexIdEcoleForPersonne != -1) {
+                finalRes = new String[mysqlRes.length][];
                 for(int i = 0; i < mysqlRes.length; i++) {
                     finalRes[i] = new String[mysqlRes[0].length + mongoRes[0].length];
                     for(int j = 0; j < mysqlRes[i].length; j++) {
@@ -134,22 +210,27 @@ public class MainWindowController implements Initializable {
                         }
                     }
                 }
+            }
 
-                // Displays results
-                populateTable(mysqlTable, mysqlRes);
-                populateTable(mongoTable, mongoRes);
-                populateTable(finalTable, finalRes);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-            catch (ParseException e) {
-                e.printStackTrace();
-            }
-        });
+            // Displays results
+            populateTable(mysqlTable, mysqlRes);
+            populateTable(mongoTable, mongoRes);
+            populateTable(finalTable, finalRes);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void populateTable(TableView table, String[][] data) {
+        table.getItems().clear();
+        table.getColumns().clear();
+        if(data == null) {
+            return;
+        }
         ObservableList<String[]> items = FXCollections.observableArrayList();
         items.addAll(Arrays.asList(data));
         items.remove(0); //remove titles from data
