@@ -18,7 +18,7 @@
                            <content>
                               <FlowPane hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="10.0">
                                  <children>
-                                    <TextField prefWidth="300.0" promptText="Your xQuery..." />
+                                    <TextField prefWidth="300.0" promptText="Your xQuery..." fx:id="originalXQuery" />
                                     <Button fx:id="executeQuery" mnemonicParsing="false" prefWidth="80.0" text="Execute" />
                                  </children>
                                  <padding>
@@ -31,8 +31,8 @@
                            <content>
                               <SplitPane dividerPositions="0.5">
                                  <items>
-                                    <TextField promptText="Splitted xQuery for MySQL Database" />
-                                    <TextField promptText="Splitted xQuery for Mongo Database" />
+                                    <TextField promptText="Splitted xQuery for MySQL Database" fx:id="mysqlXQuery" />
+                                    <TextField promptText="Splitted xQuery for Mongo Database" fx:id="mongoXQuery" />
                                  </items>
                               </SplitPane>
                            </content>
@@ -41,12 +41,12 @@
                            <items>
                               <TitledPane animated="false" collapsible="false" prefHeight="150.0" text="MySQL Wrapper">
                                  <content>
-                                    <TextField promptText="Generated MySQL Query" />
+                                    <TextField promptText="Generated MySQL Query" fx:id="mysqlQuery" />
                                  </content>
                               </TitledPane>
                               <TitledPane animated="false" collapsible="false" prefHeight="150.0" text="MongoDB Wrapper">
                                  <content>
-                                    <TextField promptText="Generated MongoDB Query" />
+                                    <TextField promptText="Generated MongoDB Query" fx:id="mongoQuery" />
                                  </content>
                               </TitledPane>
                            </items>

@@ -9,10 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.*;
 import javafx.util.Callback;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
@@ -33,7 +30,22 @@ import java.util.Vector;
 public class MainWindowController implements Initializable {
 
     @FXML
+    private TextField originalXQuery;
+
+    @FXML
     private Button executeQuery;
+
+    @FXML
+    private TextField mysqlXQuery;
+
+    @FXML
+    private TextField mongoXQuery;
+
+    @FXML
+    private TextField mysqlQuery;
+
+    @FXML
+    private TextField mongoQuery;
 
     @FXML
     private TableView mysqlTable;
@@ -59,23 +71,27 @@ public class MainWindowController implements Initializable {
         executeQuery.setOnAction(event -> {
             try {
                 // Recovers the original xQuery
-                String xQuery = "for $a in document(\"personnes\")//formations where $a//nom = \"Dupont\" return $a";
+                String xQuery = originalXQuery.getText();//"for $a in document(\"personnes\")//formations where $a//nom = \"Dupont\" return $a";
 
                 // Splits the original xQuery into queries for each Database
-                String xQueryForMysql =  "for $a in document(\"personne\")//formation return $a";
-                String xQueryForMongo =  "for $a in document(\"personne\")//prenom where $a='Aspen' return $a";
+                mysqlXQuery.setText("for $a in document(\"personne\")//formation return $a");
+                String xQueryForMysql = mysqlXQuery.getText();
+                mongoXQuery.setText("for $a in document(\"ecole\") return $a");
+                String xQueryForMongo = mongoXQuery.getText();
 
                 // Converts xQuery for MySQL Database to SQL Query
-                // String mysqlQuery = "select * from Personne where Prenom = \"Aspen\"";
+                //String mysqlQuery = "select * from Personne where Prenom = \"Aspen\"";
                 //String mysqlQuery = "select * from Personne join Formation on Personne.IDFormation = Formation.IDFormation";
                 XPath mysqlParser = new XPath(xQueryForMysql);
                 String mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
+                this.mysqlQuery.setText(mysqlQuery);
 
                 // Converts xQuery for Mongo Database to Mongo Query
                 //String mongoQuery = "db.EcoleMongoDB.find({IdEcole:\"5\"})";
                 String mongoQuery = "db.EcoleMongoDB.find()";
                 //XPath monogParser = new XPath(xQueryForMongo);
                 //String mongoQuery = monogParser.XPath2().getMongo(ParamType.INLINED);
+                this.mongoQuery.setText(mongoQuery);
 
                 // Executes the queries on each Database
                 String[][] mysqlRes = mysql.sendMYSQLRequest(mysqlQuery);
