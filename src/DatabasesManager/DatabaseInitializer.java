@@ -29,13 +29,13 @@ import java.util.HashMap;
  * Auteur: Dan Seeruttun
  */
 
-public class DatabaseManager {
+public class DatabaseInitializer {
 
 	static HashMap<Integer,String> data;
 	static MySQLManager mysql;
 	static MongoDBManager mongo;
 	
-	public DatabaseManager() throws IOException{
+	public DatabaseInitializer() throws IOException{
 		//getting data from configuration file
 		System.out.println("Init mySQL databases");
 		System.out.println("Get configuration from databasesFiles.properties");
@@ -91,7 +91,7 @@ public class DatabaseManager {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		DatabaseManager dbM = new DatabaseManager();
+		DatabaseInitializer dbM = new DatabaseInitializer();
 		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where Prenom = \"Aspen\";"));
 		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Formation where Nom = \"Eu Tellus Industries\";"));
 		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));

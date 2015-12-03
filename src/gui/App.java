@@ -1,6 +1,6 @@
 package gui;
 
-import DatabasesManager.DatabaseManager;
+import DatabasesManager.DatabaseInitializer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,10 +11,10 @@ import java.io.IOException;
 
 public class App extends Application {
 
-    final DatabaseManager dbM;
+    final DatabaseInitializer dbM;
 
     public App() throws IOException {
-        dbM = new DatabaseManager();
+        dbM = new DatabaseInitializer();
     }
 
     @Override
