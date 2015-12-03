@@ -23,12 +23,8 @@ public class Table {
 	}
 
 	public boolean hasColumn(String name){
-		for (Column c : columns) {
-			if(c.getName().equals(name)) {
-				return true;
-			}
-		}
-		return false;
+		return columns.stream()
+				.anyMatch(column -> column.getBareName().toLowerCase().equals(name.toLowerCase()));
 	}
 
 	public String getName() {
@@ -63,6 +59,13 @@ public class Table {
 	public Column getPrimaryKey() {
 		return columns.stream()
 				.filter(column -> column instanceof PrimaryKey)
+				.findFirst()
+				.get();
+	}
+
+	public Column getColumn(String name) {
+		return columns.stream()
+				.filter(column -> column.getBareName().toLowerCase().equals(name.toLowerCase()))
 				.findFirst()
 				.get();
 	}

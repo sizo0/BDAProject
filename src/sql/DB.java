@@ -14,10 +14,13 @@ public class DB {
     List<Table> tables;
 
     Map<String, Table> hashedTables; // TODO make query class and place all methods and this attr in it
+    Map<String, Column> hashedAttributes;
+
     String currentVarTable;
 
     private DB() {
         hashedTables = new HashMap<>();
+        hashedAttributes = new HashMap<>();
 
 
         tables = new ArrayList<>();
@@ -51,31 +54,40 @@ public class DB {
     public String getTableFromVarName() {
         if (hashedTables.containsKey(currentVarTable))
             return hashedTables.get(currentVarTable).getName();
-        throw new Error(currentVarTable + " was not declared.");
+        throw new Error(currentVarTable + " was not declared as a table.");
+    }
+
+    public String getAttributeFromVarName() {
+        if (hashedAttributes.containsKey(currentVarTable))
+            return hashedAttributes.get(currentVarTable).getBareName();
+        return null;
     }
 
     public void setCurrentVarTable(String var) {
         currentVarTable = var;
     }
 
-    public List<Table> getTableFromTablesAndColumns(String document, List<String> tablesOrColumns) throws Exception {
+    public List<Table> getTableFromTablesAndColumns(String document, List<String> tablesOrColumns) throws Error {
 
         if (!document.equals(tablesOrColumns.get(0)))
             tablesOrColumns.add(0, document);
         System.out.println(tablesOrColumns);
         String last = tablesOrColumns.get(tablesOrColumns.size() - 1);
-        System.out.println(last + " " + isAttribut(last));
+        System.out.println(last + " " + isAttribute(last));
         List<Table> res = new ArrayList<>();
-        if (isAttribut(last)) { // Last is an attribut
-            Column c = getColumn(last);
-            Table t = c.getOrigin();
-            System.out.println(c + " " + t);
-            if (!t.getName().toLowerCase().equals(tablesOrColumns.get(tablesOrColumns.size() - 2).toLowerCase())) {
-                throw new Exception("Last attribute is not in the table : " + tablesOrColumns.get(tablesOrColumns.size() - 2));
+        Column c = null;
+        if (isAttribute(last)) { // Last is an attribute
+            System.out.println(tablesOrColumns.get(tablesOrColumns.size() - 2));
+            Table t = getTable(tablesOrColumns.get(tablesOrColumns.size() - 2));
+            if (t == null)
+                throw new Error(tablesOrColumns.get(tablesOrColumns.size() - 2) + " is not a table.");
+            if (!t.hasColumn(last)) {
+                throw new Error("Last attribute is not in the table : " + tablesOrColumns.get(tablesOrColumns.size() - 2));
             }
+            c = t.getColumn(last);
             tablesOrColumns.remove(tablesOrColumns.size() - 1);
         } else if (!isTable(last)) { //Last is a tables
-            throw new Error(last + " is neither a table or a column!");
+            throw new Error(last + " is neither a table nor a column!");
         }
 
         res.add(getTable(tablesOrColumns.get(0)));
@@ -91,8 +103,16 @@ public class DB {
 
         System.out.println("RES " + res);
 
-        if (currentVarTable != null)
+        System.out.println(document + " " + currentVarTable);
+
+        if (currentVarTable != null) {
             hashedTables.put(currentVarTable, res.get(res.size() - 1));
+            if (isAttribute(last))
+                hashedAttributes.put(currentVarTable, c);
+        }
+
+        System.out.println(hashedTables);
+        System.out.println(hashedAttributes);
 
         return res;
     }
@@ -101,15 +121,15 @@ public class DB {
         for (int i = tables.size() - 2; i >= 0; i--) {
             Table table1 = tables.get(i + 1);
             Table table2 = tables.get(i);
-            System.out.println(table1.getPrimaryKey().getName());
-            System.out.println(table2.getForeignKey(table1).getName());
+//            System.out.println(table1.getPrimaryKey().getName());
+//            System.out.println(table2.getForeignKey(table1).getName());
             q = q.join(table(table2.getName()))
                     .on(field(table1.getPrimaryKey().getName()).equal(field(table2.getForeignKey(table1).getName())));
         }
         return q;
     }
 
-    public SelectJoinStep<Record> queryFromTablesAndColumns(SelectJoinStep<Record> join, String document, List<String> tablesOrColumns) throws Exception {
+    public SelectJoinStep<Record> queryFromTablesAndColumns(SelectJoinStep<Record> join, String document, List<String> tablesOrColumns) throws Error {
         List<Table> res = getTableFromTablesAndColumns(document, tablesOrColumns);
 
         join = join.join(table(res.get(res.size() - 1).getName())).on();
@@ -117,7 +137,7 @@ public class DB {
         return joinQueryFromTables(join, res);
     }
 
-    public SelectJoinStep<Record> queryFromTablesAndColumns(String document, List<String> tablesOrColumns) throws Exception {
+    public SelectJoinStep<Record> queryFromTablesAndColumns(String document, List<String> tablesOrColumns) throws Error {
         List<Table> res = getTableFromTablesAndColumns(document, tablesOrColumns);
 
         SelectJoinStep<Record> q = select().select(field("*")).from(table(res.get(res.size() - 1).getName()));
@@ -135,12 +155,10 @@ public class DB {
     }
 
     private Column getColumn(String last) {
+        Column c;
         for (Table t : tables) {
-            for (Column c : t.getColumns()) {
-                if (c.getName().toLowerCase().equals(last.toLowerCase())) {
-                    return c;
-                }
-            }
+            if ((c = t.getColumn(last)) != null)
+                return c;
         }
         return null;
     }
@@ -154,15 +172,9 @@ public class DB {
         return null;
     }
 
-    private boolean isAttribut(String s) {
-        for (Table t : tables) {
-            for (Column c : t.getColumns()) {
-                if (c.getName().equals(s)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private boolean isAttribute(String s) {
+        return tables.stream()
+                .anyMatch(table -> table.hasColumn(s));
     }
 
     public Condition makeCondition(Condition cwhere1, String operator, Condition cwhere2) {

@@ -16,4 +16,16 @@ public class Column {
 	public Table getOrigin() {
 		return origin;
 	}
+
+	@Override
+	public String toString() {
+		return "Column{" +
+				"name='" + name + '\'' +
+				", table='" + origin.getName() + '\'' +
+				'}';
+	}
+
+	public String getBareName() {
+		return name;
+	}
 }

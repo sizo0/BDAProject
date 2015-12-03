@@ -3650,7 +3650,6 @@ void VarName()  :
   try {
 /*@egen*/
   QName() {
-  DB.INSTANCE.setCurrentVarTable(token.toString());
   }/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
@@ -6408,19 +6407,35 @@ void QName()  :
   try {
 /*@egen*/
   (FunctionQName() {
+  if (!isStep) DB.INSTANCE.setCurrentVarTable(token.toString());
   if (afterDocument) tablesOrColumns.add(token.toString());
-  if (isWhere && isStep) {
-  System.out.println(currentWhere + " " + afterComparison + " " + token.toString());
-    if (afterComparison && currentWhere.getColumn() != null) {
-        currentWhere.setFieldTransform(true);
-        currentWhere.setValue(new Value((new Column(
-        DB.INSTANCE.getTableFromVarName(), token.toString())).toString(), new StringConvert()));
-        cwheres.push(currentWhere.toSQL());
-        currentWhere = new Where();
-    }
-    else
-        currentWhere.setColumn(new Column(DB.INSTANCE.getTableFromVarName(), token.toString()));
+    if (isWhere) {
+        String c;
+        if ((c = DB.INSTANCE.getAttributeFromVarName()) != null) {
+            System.out.println("A: " + currentWhere + " " + isStep + " " + afterComparison + " " + token.toString() + " " + c);
+            if (afterComparison && currentWhere.getColumn() != null) {
+                currentWhere.setFieldTransform(true);
+                currentWhere.setValue(new Value((new Column(
+                DB.INSTANCE.getTableFromVarName(), c)).toString(), new StringConvert()));
+                cwheres.push(currentWhere.toSQL());
+                currentWhere = new Where();
+            }
+            else
+             currentWhere.setColumn(new Column(DB.INSTANCE.getTableFromVarName(), c));
+        }
+      else if (isStep) {
+      System.out.println("B: " + currentWhere + " " + afterComparison + " " + token.toString());
+        if (afterComparison && currentWhere.getColumn() != null) {
+            currentWhere.setFieldTransform(true);
+            currentWhere.setValue(new Value((new Column(
+            DB.INSTANCE.getTableFromVarName(), token.toString())).toString(), new StringConvert()));
+            cwheres.push(currentWhere.toSQL());
+            currentWhere = new Where();
+        }
+        else
+            currentWhere.setColumn(new Column(DB.INSTANCE.getTableFromVarName(), token.toString()));
     afterComparison=false;
+        }
   }
   } | "attribute"/*@bgen(jjtree)*/
                                 {

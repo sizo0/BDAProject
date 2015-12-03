@@ -49,8 +49,14 @@ public class Test {
     public static void main(String args[]) {
         Test test = new Test();
         try {
-            test.parse((new XPath("for $a in document('personnes')//personnes where $a/name='Dupont' return ''")));
-            test.parse((new XPath("for $a in document('personnes')//formations where $a/name='INFO' return ''")));
+            test.parse((new XPath("for $a in document('personnes')//personnes where $a/nom='Dupont' return $a")));
+            test.parse((new XPath("for $a in document('personnes')//formations where $a/nom='INFO' return $a")));
+            test.parse((new XPath("for $a in document('personnes')//nom where $a='Dupont' return $a")));
+            test.parse((new XPath("for $a in document('personnes')//personnes, $b in document('formations')//formations where $a/idFormation=58 return $a")));
+            test.parse((new XPath("for $a in document('personnes')//personnes, $b in document('formations')//formations where $a/idFormation=$b/id return $a")));
+            test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a='Dupont' return $a")));
+            test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a=$b return $a")));
+            test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a=$b and $a='Dupont' return $a")));
         } catch (ParseException e) {
             e.printStackTrace();
         }
