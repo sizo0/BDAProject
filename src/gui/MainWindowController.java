@@ -1,6 +1,8 @@
 package gui;
 
-import DatabasesManager.DatabaseManager;
+import DatabasesManager.DatabaseInitializer;
+import DatabasesManager.MongoDBManager;
+import DatabasesManager.MySQLManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -42,10 +44,14 @@ public class MainWindowController implements Initializable {
     @FXML
     private TableView finalTable;
 
-    private final DatabaseManager dbM;
+    private final DatabaseInitializer dbM;
+    private final MySQLManager mysql;
+    private final MongoDBManager mongo;
 
-    public MainWindowController(DatabaseManager dbM) {
+    public MainWindowController(DatabaseInitializer dbM) {
         this.dbM = dbM;
+        mysql = dbM.getMysql();
+        mongo = dbM.getMongo();
     }
 
     @Override
@@ -62,7 +68,7 @@ public class MainWindowController implements Initializable {
                 // Converts xQuery for MySQL Database to SQL Query
                 // String mysqlQuery = "select * from Personne where Prenom = \"Aspen\"";
                 String mysqlQuery = "select * from Personne join Formation on Personne.IDFormation = Formation.IDFormation";
-                //XPath mysqlParser = new XPath(new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(xQueryForMysql), "UTF-8")));
+                //XPath mysqlParser = new XPath(xQueryForMysql);
                 //String mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
 
                 // Converts xQuery for Mongo Database to Mongo Query
@@ -72,8 +78,8 @@ public class MainWindowController implements Initializable {
                 //String mongoQuery = monogParser.XPath2().getMongo(ParamType.INLINED);
 
                 // Executes the queries on each Database
-                String[][] mysqlRes = dbM.sendSQLDatabaseRequest(mysqlQuery);
-                String[][] mongoRes = dbM.sendMongoRequest(mongoQuery);
+                String[][] mysqlRes = mysql.sendMYSQLRequest(mysqlQuery);
+                String[][] mongoRes = mongo.sendMongoRequest(mongoQuery);
 
                 // Joins the two results into one
                 int indexIdEcoleForPersonne = 0;
