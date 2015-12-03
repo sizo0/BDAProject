@@ -1,6 +1,6 @@
 package gui;
 
-import DatabasesManager.DatabaseManager;
+import DatabasesManager.DatabaseInitializer;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -42,9 +42,9 @@ public class MainWindowController implements Initializable {
     @FXML
     private TableView finalTable;
 
-    private final DatabaseManager dbM;
+    private final DatabaseInitializer dbM;
 
-    public MainWindowController(DatabaseManager dbM) {
+    public MainWindowController(DatabaseInitializer dbM) {
         this.dbM = dbM;
     }
 
