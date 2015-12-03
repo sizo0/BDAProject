@@ -54,14 +54,14 @@ public class DatabaseInitializer {
 		mongo.initConnection();
 	}
 	
-	public String[][] sendSQLDatabaseRequest(String request) throws IOException{
+	/*public String[][] sendSQLDatabaseRequest(String request) throws IOException{
 		return mysql.sendMYSQLRequest(request);
 	}
 	
 	public String[][] sendMongoRequest(String request) throws IOException{
 		return mongo.sendMongoRequest(request);
 	}
-
+*/
 	public void getData() throws IOException{
 		PropertiesHandler properties = new PropertiesHandler();
 		data = properties.getPropValues();
@@ -74,7 +74,23 @@ public class DatabaseInitializer {
 		}
 	}
 	
-	public void print2DimTableInConsole(String[][] tab)
+	public static MySQLManager getMysql() {
+		return mysql;
+	}
+
+	public static void setMysql(MySQLManager mysql) {
+		DatabaseInitializer.mysql = mysql;
+	}
+
+	public static MongoDBManager getMongo() {
+		return mongo;
+	}
+
+	public static void setMongo(MongoDBManager mongo) {
+		DatabaseInitializer.mongo = mongo;
+	}
+	
+	public static void print2DimTableInConsole(String[][] tab)
 	{
 		if (tab == null){
 			System.out.println("No answer");
@@ -91,10 +107,15 @@ public class DatabaseInitializer {
 	}
 	
 	public static void main(String[] args) throws IOException {
+		//call to init relations
 		DatabaseInitializer dbM = new DatabaseInitializer();
-		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Personne where Prenom = \"Aspen\";"));
-		dbM.print2DimTableInConsole(dbM.sendSQLDatabaseRequest("select * from Formation where Nom = \"Eu Tellus Industries\";"));
-		dbM.print2DimTableInConsole(dbM.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));
+		MySQLManager mysqlmanager = getMysql();
+		MongoDBManager mongodbmanager = getMongo();
+		
+		//call to send requests
+		print2DimTableInConsole(mysqlmanager.sendMYSQLRequest("select * from Personne where Prenom = \"Aspen\";"));
+		print2DimTableInConsole(mysqlmanager.sendMYSQLRequest("select * from Formation where Nom = \"Eu Tellus Industries\";"));
+		print2DimTableInConsole(mongodbmanager.sendMongoRequest("db.EcoleMongoDB.find({IdEcole:\"5\"})"));
 		dbM.clear();
 		//L'interface doit appeler Clear quand l'application se ferme pour permettre le nettoyage de base de donn�es
 	}

@@ -1,6 +1,8 @@
 package gui;
 
 import DatabasesManager.DatabaseInitializer;
+import DatabasesManager.MongoDBManager;
+import DatabasesManager.MySQLManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -43,9 +45,13 @@ public class MainWindowController implements Initializable {
     private TableView finalTable;
 
     private final DatabaseInitializer dbM;
+    private final MySQLManager mysql;
+    private final MongoDBManager mongo;
 
     public MainWindowController(DatabaseInitializer dbM) {
         this.dbM = dbM;
+        mysql = dbM.getMysql();
+        mongo = dbM.getMongo();
     }
 
     @Override
@@ -72,8 +78,8 @@ public class MainWindowController implements Initializable {
                 //String mongoQuery = monogParser.XPath2().getMongo(ParamType.INLINED);
 
                 // Executes the queries on each Database
-                String[][] mysqlRes = dbM.sendSQLDatabaseRequest(mysqlQuery);
-                String[][] mongoRes = dbM.sendMongoRequest(mongoQuery);
+                String[][] mysqlRes = mysql.sendMYSQLRequest(mysqlQuery);
+                String[][] mongoRes = mongo.sendMongoRequest(mongoQuery);
 
                 // Joins the two results into one
                 int indexIdEcoleForPersonne = 0;
