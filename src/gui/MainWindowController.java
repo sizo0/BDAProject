@@ -62,7 +62,7 @@ public class MainWindowController implements Initializable {
                 // Converts xQuery for MySQL Database to SQL Query
                 // String mysqlQuery = "select * from Personne where Prenom = \"Aspen\"";
                 String mysqlQuery = "select * from Personne join Formation on Personne.IDFormation = Formation.IDFormation";
-                //XPath mysqlParser = new XPath(new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(xQueryForMysql), "UTF-8")));
+                //XPath mysqlParser = new XPath(xQueryForMysql);
                 //String mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
 
                 // Converts xQuery for Mongo Database to Mongo Query
