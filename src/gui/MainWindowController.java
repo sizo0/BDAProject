@@ -62,19 +62,19 @@ public class MainWindowController implements Initializable {
                 String xQuery = "for $a in document(\"personnes\")//formations where $a//nom = \"Dupont\" return $a";
 
                 // Splits the original xQuery into queries for each Database
-                String xQueryForMysql =  "for $a in document(\"personnes\")//formations where $a//nom = \"Dupont\" return $a";
-                String xQueryForMongo =  "for $a in document(\"personnes\")//formations where $a//nom = \"Dupont\" return $a";
+                String xQueryForMysql =  "for $a in document(\"personne\")//formation return $a";
+                String xQueryForMongo =  "for $a in document(\"personne\")//prenom where $a='Aspen' return $a";
 
                 // Converts xQuery for MySQL Database to SQL Query
                 // String mysqlQuery = "select * from Personne where Prenom = \"Aspen\"";
-                String mysqlQuery = "select * from Personne join Formation on Personne.IDFormation = Formation.IDFormation";
-                //XPath mysqlParser = new XPath(xQueryForMysql);
-                //String mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
+                //String mysqlQuery = "select * from Personne join Formation on Personne.IDFormation = Formation.IDFormation";
+                XPath mysqlParser = new XPath(xQueryForMysql);
+                String mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
 
                 // Converts xQuery for Mongo Database to Mongo Query
                 //String mongoQuery = "db.EcoleMongoDB.find({IdEcole:\"5\"})";
                 String mongoQuery = "db.EcoleMongoDB.find()";
-                //XPath monogParser = new XPath(new BufferedReader(new InputStreamReader(new java.io.StringBufferInputStream(xQueryForMongo), "UTF-8")));
+                //XPath monogParser = new XPath(xQueryForMongo);
                 //String mongoQuery = monogParser.XPath2().getMongo(ParamType.INLINED);
 
                 // Executes the queries on each Database
@@ -127,9 +127,9 @@ public class MainWindowController implements Initializable {
             catch (IOException e) {
                 e.printStackTrace();
             }
-            /*catch (ParseException e) {
+            catch (ParseException e) {
                 e.printStackTrace();
-            }*/
+            }
         });
     }
 

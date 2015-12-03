@@ -24,19 +24,19 @@ public class DB {
 
 
         tables = new ArrayList<>();
-        Table personnes = new Table("Personnes");
-        Table formations = new Table("Formations");
-        Table ecoles = new Table("Ecoles");
+        Table personnes = new Table("Personne");
+        Table formations = new Table("Formation");
+        Table ecoles = new Table("Ecole");
 
 
         Column id = new PrimaryKey("id", personnes);
         Column nom = new Column("nom", personnes);
         Column prenom = new Column("prenom", personnes);
-        Column idFormation = new ForeignKey("idFormation", personnes, formations);
+        Column idFormation = new ForeignKey("IDFormation", personnes, formations);
 
-        Column idF = new PrimaryKey("id", formations);
+        Column idF = new PrimaryKey("IDFormation", formations);
         Column nomF = new Column("nom", formations);
-        Column idEcole = new ForeignKey("idEcole", formations, ecoles);
+        Column idEcole = new ForeignKey("IDEcole", formations, ecoles);
 
         personnes.add(id)
                 .add(nom)
