@@ -20,7 +20,7 @@ public class DB {
         collections = new ArrayList<>();
         Collection personnes = new Collection("Personne");
         Collection formations = new Collection("Formation");
-        Collection ecoles = new Collection("Ecole");
+        Collection ecoles = new Collection("EcoleMongoDB");
 
 
         Field id = new PrimaryKey("_id", personnes);

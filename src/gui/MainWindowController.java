@@ -73,11 +73,11 @@ public class MainWindowController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
 
         queries.add(
-            "for $a in document(\"personne\")//formation, $b in document(\"ecole\") where $a/IDEcole = $b/IdEcole return $a, $b"
+            "for $a in document(\"personne\")//formation, $b in document(\"EcoleMongoDB\") where $a/IDEcole = $b/IdEcole return $a, $b"
         );
         queriesSplits.put(queries.get(0), new Pair<String, String>(
             "for $a in document(\"personne\")//formation return $a",
-            "for $b in document(\"ecole\")//ecole return $b"
+            "for $b in document(\"EcoleMongoDB\")//EcoleMongoDB return $b"
         ));
 
         queries.add(
@@ -89,11 +89,11 @@ public class MainWindowController implements Initializable {
         ));
 
         queries.add(
-            "for $a in document(\"ecole\")//Nom where $a = \"INSA de Rennes\" return $a"
+            "for $a in document(\"EcoleMongoDB\")//Nom where $a = \"INSA de Rennes\" return $a"
         );
         queriesSplits.put(queries.get(2), new Pair<String, String>(
             "",
-            "for $a in document(\"ecole\")//Nom where $a = \"INSA de Rennes\" return $a"
+            "for $a in document(\"EcoleMongoDB\")//Nom where $a = \"INSA de Rennes\" return $a"
         ));
 
         queries.add(
@@ -101,7 +101,7 @@ public class MainWindowController implements Initializable {
         );
         queriesSplits.put(queries.get(3), new Pair<String, String>(
             "for $a in document(\"personne\")//personne where $a/nom = \"Macias\" return $a",
-            "for $b in document(\"ecole\")//ecole return $b"
+            "for $b in document(\"EcoleMongoDB\")//EcoleMongoDB return $b"
         ));
 
         originalXQuery.setItems(FXCollections.observableArrayList(queries));
@@ -138,7 +138,7 @@ public class MainWindowController implements Initializable {
             String mysqlQuery = "";
             if(xQueryForMysql.length() > 0) {
                 XPath mysqlParser = new XPath(xQueryForMysql);
-//                mysqlQuery = mysqlParser.XPath2().getSQL(ParamType.INLINED);
+                mysqlQuery = mysqlParser.XPath2().getSql().getSQL(ParamType.INLINED);
             }
             this.mysqlQuery.setText(mysqlQuery);
 
@@ -146,14 +146,17 @@ public class MainWindowController implements Initializable {
             String mongoQuery = "";
             if(xQueryForMongo.length() > 0) {
                 // TODO: REMOVE HARD CODED MONGO QUERY, utiliser XPath une fois fait
-                if(xQuery.equals(queries.get(0)) || xQuery.equals(queries.get(3))) {
+                if(mode == ComputeMode.ALL && (xQuery.equals(queries.get(0)) || xQuery.equals(queries.get(3)))) {
                     mongoQuery = "db.EcoleMongoDB.find()";
                 }
-                else if(xQuery.equals(queries.get(2))) {
+                else if(mode == ComputeMode.ALL && xQuery.equals(queries.get(2))) {
                     mongoQuery = "db.EcoleMongoDB.find({Nom: \"INSA de Rennes\"})";
                 }
-                //XPath mongoParser = new XPath(xQueryForMongo);
-                //String mongoQuery = monogParser.XPath2().getMongo(ParamType.INLINED);
+                else {
+                    // TODO: MongoDb ne marche pas
+                    XPath mongoParser = new XPath(xQueryForMongo);
+                    mongoQuery = mongoParser.XPath2().getMongodb().get();
+                }
             }
             this.mongoQuery.setText(mongoQuery);
 
@@ -220,9 +223,9 @@ public class MainWindowController implements Initializable {
         catch (IOException e) {
             e.printStackTrace();
         }
-//        catch (ParseException e) {
-//            e.printStackTrace();
-//        }
+        catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void populateTable(TableView table, String[][] data) {

@@ -25,7 +25,7 @@ public class DB {
         tables = new ArrayList<>();
         Table personnes = new Table("Personne");
         Table formations = new Table("Formation");
-        Table ecoles = new Table("Ecole");
+        Table ecoles = new Table("EcoleMongoDB");
 
 
         Column id = new PrimaryKey("id", personnes);
