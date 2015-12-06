@@ -12,6 +12,7 @@
 
 package org.w3c.xqparser;
 
+import com.mongodb.QueryBuilder;
 import java.nio.charset.StandardCharsets;
 import org.jooq.conf.ParamType;
 import org.jooq.Condition;
@@ -34,6 +35,7 @@ import static org.jooq.impl.DSL.*;
 import sql.DB;
 import query.*;
 import query.command.*;
+import wrapper.Wrapper;
 
 public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bgen(jjtree)*/
   protected JJTXPathState jjtree = new JJTXPathState();
@@ -44,6 +46,7 @@ public class XPath/*@bgen(jjtree)*/implements XPathTreeConstants/*@egen*/ {/*@bg
     String document;
     List<String> tablesOrColumns = new ArrayList<String>();
     Stack<Condition> cwheres = new Stack<Condition>();
+//    Stack<QueryBuilder> cmwheres = new Stack<QueryBuilder>();
     Stack<String> operators = new Stack<String>();
     Where currentWhere;
     Map<String, Table> tables = new HashMap<String, Table>();
@@ -207,7 +210,7 @@ TOKEN_MGR_DECLS : {
 }
 
 
-		SelectJoinStep<Record> XPath2() :
+		Wrapper XPath2() :
 		{/*@bgen(jjtree) XPath2 */
   SimpleNode jjtn000 = new SimpleNode(this, JJTXPATH2);
   boolean jjtc000 = true;
@@ -224,7 +227,8 @@ TOKEN_MGR_DECLS : {
 /*@egen*/
 		  { if(this.token_source.curLexState == XPathConstants.EXPR_COMMENT)
                             throw new ParseException("Unterminated comment.");
-			return query ; }/*@bgen(jjtree)*/
+
+			return new Wrapper(query, mongodb.DB.INSTANCE.getQuery()) ; }/*@bgen(jjtree)*/
                   } catch (Throwable jjte000) {
                     if (jjtc000) {
                       jjtree.clearNodeScope(jjtn000);
@@ -1420,7 +1424,7 @@ void FLWORExpr()  :
 {/*@bgen(jjtree) FLWORExpr */
   try {
 /*@egen*/
-  ((ForClause() | LetClause()))+  [WhereClause()] [OrderByClause()] "return" ExprSingle()/*@bgen(jjtree)*/
+  ((ForClause() | LetClause()))+ [WhereClause()] [OrderByClause()] "return" ExprSingle()/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -1458,9 +1462,10 @@ void ForClause()  :
   isDocument = false;afterDocument=false;
   System.out.println(document);
   System.out.println(tablesOrColumns);
-  // todo retrieve tables and columns from tablesOrColumns using sql package and begin making query
-  query = DB.INSTANCE.queryFromTablesAndColumns(document, tablesOrColumns);
-  } (// todo join
+    query = DB.INSTANCE.queryFromTablesAndColumns(document, tablesOrColumns);
+  mongodb.DB.INSTANCE.initQuery();
+  mongodb.DB.INSTANCE.newQuery(document, tablesOrColumns);
+  } (
   {
   isJoin = true;
   tablesOrColumns.clear();
@@ -1470,6 +1475,8 @@ void ForClause()  :
   System.out.println(document);
   System.out.println(tablesOrColumns);
   query = DB.INSTANCE.queryFromTablesAndColumns(query, document, tablesOrColumns);
+  mongodb.DB.INSTANCE.newQuery(document, tablesOrColumns);
+  mongodb.DB.INSTANCE.makeJoin();
   }
   )*/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
@@ -1580,6 +1587,7 @@ void WhereClause()  :
     System.out.println(cwheres);
     System.out.println(operators);
     System.out.println(query.where(cwheres.pop()).getSQL(ParamType.INLINED));
+    System.out.println(mongodb.DB.INSTANCE.getQuery());
   }
   } catch (Throwable jjte000) {
     if (jjtc000) {
@@ -1962,7 +1970,10 @@ void OrExpr()              :
                 Condition cwhere2 = cwheres.pop();
                 String operator = operators.pop();
                 cwheres.push(DB.INSTANCE.makeCondition(cwhere1, operator, cwhere2));
-                System.out.println(cwheres);
+//                QueryBuilder cmwhere1 = cmwheres.pop();
+//                QueryBuilder cmwhere2 = cmwheres.pop();
+//                cmwheres.push(mongodb.DB.INSTANCE.makeCondition(cmwhere1, operator, cmwhere2));
+            System.out.println(cwheres);
                 System.out.println("/OR " + cwheres.size());
                   SimpleNode jjtn001 = new SimpleNode(this, JJTOREXPR);
                   boolean jjtc001 = true;
@@ -2037,6 +2048,9 @@ void AndExpr()               :
                 Condition cwhere2 = cwheres.pop();
                 String operator = operators.pop();
                 cwheres.push(DB.INSTANCE.makeCondition(cwhere1, operator, cwhere2));
+//                QueryBuilder cmwhere1 = cmwheres.pop();
+//                QueryBuilder cmwhere2 = cmwheres.pop();
+//                cmwheres.push(mongodb.DB.INSTANCE.makeCondition(cmwhere1, operator, cmwhere2));
                 System.out.println(cwheres);
                 System.out.println("/AND " + cwheres.size());
                   SimpleNode jjtn001 = new SimpleNode(this, JJTANDEXPR);
@@ -3526,6 +3540,7 @@ void PrimaryExpr()        :
     try {
         System.out.println(currentWhere.toSQL());
         cwheres.push(currentWhere.toSQL());
+//        cmwheres.push(currentWhere.toMongoDB());
         currentWhere = new Where();
         } catch(Exception e) {
 
@@ -6407,10 +6422,11 @@ void QName()  :
   try {
 /*@egen*/
   (FunctionQName() {
-  if (!isStep) DB.INSTANCE.setCurrentVarTable(token.toString());
+  if (!isStep) { DB.INSTANCE.setCurrentVarTable(token.toString()); mongodb.DB.INSTANCE.setCurrentVar(token.toString()); }
   if (afterDocument) tablesOrColumns.add(token.toString());
     if (isWhere) {
-        String c;
+       System.out.println("isWhere: " + currentWhere + " " + isStep + " " + afterComparison + " " + token.toString() + " " + DB.INSTANCE.getAttributeFromVarName());
+ String c;
         if ((c = DB.INSTANCE.getAttributeFromVarName()) != null) {
             System.out.println("A: " + currentWhere + " " + isStep + " " + afterComparison + " " + token.toString() + " " + c);
             if (afterComparison && currentWhere.getColumn() != null) {

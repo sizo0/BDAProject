@@ -22,7 +22,6 @@ public class DB {
         hashedTables = new HashMap<>();
         hashedAttributes = new HashMap<>();
 
-
         tables = new ArrayList<>();
         Table personnes = new Table("Personnes");
         Table formations = new Table("Formations");
@@ -33,22 +32,32 @@ public class DB {
         Column nom = new Column("nom", personnes);
         Column prenom = new Column("prenom", personnes);
         Column idFormation = new ForeignKey("idFormation", personnes, formations);
+        Column idEcole = new ForeignKey("idEcole", personnes, ecoles);
 
         Column idF = new PrimaryKey("id", formations);
         Column nomF = new Column("nom", formations);
-        Column idEcole = new ForeignKey("idEcole", formations, ecoles);
+
 
         personnes.add(id)
                 .add(nom)
                 .add(prenom)
-                .add(idFormation);
+                .add(idFormation)
+                .add(idEcole);
 
         formations.add(idF)
-                .add(nomF)
-                .add(idEcole);
+                .add(idEcole)
+                .add(nomF);
+
+        // to remove
+        Column idE = new PrimaryKey("id", ecoles);
+        Column nomE = new Column("Nom", formations);
+        ecoles.add(idE)
+                .add(nomE);
+        // \to remove
 
         tables.add(personnes);
         tables.add(formations);
+        tables.add(ecoles);// to remove
     }
 
     public String getTableFromVarName() {
@@ -58,6 +67,8 @@ public class DB {
     }
 
     public String getAttributeFromVarName() {
+        System.out.println(currentVarTable);
+        System.out.println(hashedAttributes);
         if (hashedAttributes.containsKey(currentVarTable))
             return hashedAttributes.get(currentVarTable).getBareName();
         return null;
@@ -68,7 +79,6 @@ public class DB {
     }
 
     public List<Table> getTableFromTablesAndColumns(String document, List<String> tablesOrColumns) throws Error {
-
         if (!document.equals(tablesOrColumns.get(0)))
             tablesOrColumns.add(0, document);
         System.out.println(tablesOrColumns);
@@ -107,6 +117,8 @@ public class DB {
 
         if (currentVarTable != null) {
             hashedTables.put(currentVarTable, res.get(res.size() - 1));
+            System.out.println("isAttribute: " + " " + last + " : " + isAttribute(last));
+            System.out.println(c);
             if (isAttribute(last))
                 hashedAttributes.put(currentVarTable, c);
         }

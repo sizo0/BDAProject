@@ -1,5 +1,6 @@
 package query;
 
+import com.mongodb.QueryBuilder;
 import org.jooq.Condition;
 
 import static org.jooq.impl.DSL.field;
@@ -83,4 +84,5 @@ public class Where {
     public void setFieldTransform(boolean fieldTransform) {
         this.fieldTransform = fieldTransform;
     }
+
 }

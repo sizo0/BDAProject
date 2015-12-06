@@ -17,13 +17,19 @@
 // THE ONE IN THE ${spec}-src DIRECTORY IS A COPY!!!
 package org.w3c.xqparser;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
+import org.bson.types.ObjectId;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.jooq.conf.ParamType;
+import wrapper.Wrapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.regex.Pattern;
 
 /**
  * Title: Description: Copyright: Copyright (c) 2001 Company:
@@ -51,12 +57,15 @@ public class Test {
         try {
             test.parse((new XPath("for $a in document('personnes')//personnes where $a/nom='Dupont' return $a")));
             test.parse((new XPath("for $a in document('personnes')//formations where $a/nom='INFO' return $a")));
-            test.parse((new XPath("for $a in document('personnes')//nom where $a='Dupont' return $a")));
+            test.parse((new XPath("for $a in document('Personnes')//Nom where $a='Dupont' return $a")));
             test.parse((new XPath("for $a in document('personnes')//personnes, $b in document('formations')//formations where $a/idFormation=58 return $a")));
             test.parse((new XPath("for $a in document('personnes')//personnes, $b in document('formations')//formations where $a/idFormation=$b/id return $a")));
             test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a='Dupont' return $a")));
             test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a=$b return $a")));
             test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a=$b and $a='Dupont' return $a")));
+            test.parse((new XPath("for $a in document(\"Personnes\")//Ecoles where $a/Nom=\"INSA de Rennes\" return $a")));
+            test.parse((new XPath("for $a in document(\"Personnes\")//Formations/Ecoles where $a/Nom=\"INSA de Rennes\" return $a")));
+            test.parse((new XPath("for $a in document('Personnes')//Personnes, $b in document('Ecoles')//Ecoles where $a/Nom = 1 return $a")));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -64,8 +73,9 @@ public class Test {
 
     public void parse(XPath q) throws ParseException {
         System.setOut(devNull);
-        String query = q.XPath2().getSQL(ParamType.INLINED);
+        Wrapper query = q.XPath2();
         System.setOut(original);
-        System.out.println(query);
+        System.out.println(query.getMongodb().get());
+        System.out.println(query.getSql().getSQL(ParamType.INLINED));
     }
 }
