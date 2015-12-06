@@ -18,9 +18,9 @@ public class DB {
     private DB() {
 
         collections = new ArrayList<>();
-        Collection personnes = new Collection("Personnes");
-        Collection formations = new Collection("Formations");
-        Collection ecoles = new Collection("Ecoles");
+        Collection personnes = new Collection("Personne");
+        Collection formations = new Collection("Formation");
+        Collection ecoles = new Collection("Ecole");
 
 
         Field id = new PrimaryKey("_id", personnes);

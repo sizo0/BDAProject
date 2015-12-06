@@ -55,17 +55,17 @@ public class Test {
     public static void main(String args[]) {
         Test test = new Test();
         try {
-            test.parse((new XPath("for $a in document('personnes')//personnes where $a/nom='Dupont' return $a")));
-            test.parse((new XPath("for $a in document('personnes')//formations where $a/nom='INFO' return $a")));
-            test.parse((new XPath("for $a in document('Personnes')//Nom where $a='Dupont' return $a")));
-            test.parse((new XPath("for $a in document('personnes')//personnes, $b in document('formations')//formations where $a/idFormation=58 return $a")));
-            test.parse((new XPath("for $a in document('personnes')//personnes, $b in document('formations')//formations where $a/idFormation=$b/id return $a")));
-            test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a='Dupont' return $a")));
-            test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a=$b return $a")));
-            test.parse((new XPath("for $a in document('personnes')//nom, $b in document('formations')//nom where $a=$b and $a='Dupont' return $a")));
-            test.parse((new XPath("for $a in document(\"Personnes\")//Ecoles where $a/Nom=\"INSA de Rennes\" return $a")));
-            test.parse((new XPath("for $a in document(\"Personnes\")//Formations/Ecoles where $a/Nom=\"INSA de Rennes\" return $a")));
-            test.parse((new XPath("for $a in document('Personnes')//Personnes, $b in document('Ecoles')//Ecoles where $a/Nom = 1 return $a")));
+            test.parse((new XPath("for $a in document('personne')//personne where $a/nom='Dupont' return $a")));
+            test.parse((new XPath("for $a in document('personne')//formation where $a/nom='INFO' return $a")));
+            test.parse((new XPath("for $a in document('Personne')//Nom where $a='Dupont' return $a")));
+            test.parse((new XPath("for $a in document('personne')//personne, $b in document('formation')//formation where $a/idFormation=58 return $a")));
+            test.parse((new XPath("for $a in document('personne')//personne, $b in document('formation')//formation where $a/idFormation=$b/id return $a")));
+            test.parse((new XPath("for $a in document('personne')//nom, $b in document('formation')//nom where $a='Dupont' return $a")));
+            test.parse((new XPath("for $a in document('personne')//nom, $b in document('formation')//nom where $a=$b return $a")));
+            test.parse((new XPath("for $a in document('personne')//nom, $b in document('formation')//nom where $a=$b and $a='Dupont' return $a")));
+            test.parse((new XPath("for $a in document(\"Personne\")//Ecole where $a/Nom=\"INSA de Rennes\" return $a")));
+            test.parse((new XPath("for $a in document('Personne')//Formation/Ecole where $a/Nom='INSA de Rennes' return $a")));
+            test.parse((new XPath("for $a in document('Personne')//Personne, $b in document('Ecole')//Ecole where $a/Nom = 1 return $a")));
         } catch (ParseException e) {
             e.printStackTrace();
         }

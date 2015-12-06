@@ -23,20 +23,19 @@ public class DB {
         hashedAttributes = new HashMap<>();
 
         tables = new ArrayList<>();
-        Table personnes = new Table("Personnes");
-        Table formations = new Table("Formations");
-        Table ecoles = new Table("Ecoles");
+        Table personnes = new Table("Personne");
+        Table formations = new Table("Formation");
+        Table ecoles = new Table("Ecole");
 
 
         Column id = new PrimaryKey("id", personnes);
-        Column nom = new Column("nom", personnes);
-        Column prenom = new Column("prenom", personnes);
-        Column idFormation = new ForeignKey("idFormation", personnes, formations);
-        Column idEcole = new ForeignKey("idEcole", personnes, ecoles);
+        Column nom = new Column("Nom", personnes);
+        Column prenom = new Column("Prenom", personnes);
+        Column idFormation = new ForeignKey("IDFormation", personnes, formations);
+        Column idEcole = new ForeignKey("IDEcole", personnes, ecoles);
 
-        Column idF = new PrimaryKey("id", formations);
-        Column nomF = new Column("nom", formations);
-
+        Column idF = new PrimaryKey("IDFormation", formations);
+        Column nomF = new Column("Nom", formations);
 
         personnes.add(id)
                 .add(nom)
@@ -49,7 +48,7 @@ public class DB {
                 .add(nomF);
 
         // to remove
-        Column idE = new PrimaryKey("id", ecoles);
+        Column idE = new PrimaryKey("IDEcole", ecoles);
         Column nomE = new Column("Nom", formations);
         ecoles.add(idE)
                 .add(nomE);
