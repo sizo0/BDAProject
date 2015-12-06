@@ -37,6 +37,45 @@ public class MongoDBManager {
 			}
 			Process p=Runtime.getRuntime().exec("cmd /C Start /B mongod.exe"); 
 			System.out.println("Launching Mongob");
+			// TODO: execute this functions
+			// function searchName(o, i, v) {
+//			var property = i + v;
+//			if (o.hasOwnProperty(property))
+//				return searchName(o, i, v + 1)
+//			return property
+//		}
+//		function clone(o) {
+//				var c = {}
+//		for (var i in o)
+//		if(o.hasOwnProperty(i))
+//			c[i] = o[i]
+//		return c
+//		}
+//		function toArray(o) {
+//		return Object.keys(o).map(function (k) {
+//			return o[k]
+//		})
+//		}
+//		function extend() {
+//			arguments = toArray(arguments)
+//			if (arguments.length == 0) return { };
+//			if (arguments.length == 1) return arguments.shift();
+//			o = arguments.shift()
+//			u = arguments.shift()
+//			if (arguments.length > 0) {
+//				arguments.unshift(extend(o, u))
+//				return extend.apply(this, arguments)
+//			}
+//			var c = clone(o)
+//			for (var i in u) {
+//				if (u.hasOwnProperty(i))
+//					if(c.hasOwnProperty(i))
+//						j = searchName(c, i, 0)
+//					else j = i
+//				c[j] = u[i]
+//			}
+//			return c
+//		}
         }
 		catch(IOException e1) {System.out.println("Launching mongob process NOK " + e1);} 
 		

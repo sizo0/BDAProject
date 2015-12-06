@@ -79,7 +79,7 @@ public class Query {
     }
 
     private String getFooter() {
-        String footer = "})";
+        String footer = "});";
 
         for (Query ignored : joins) {
             footer += "});";
