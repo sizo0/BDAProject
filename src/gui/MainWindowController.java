@@ -145,15 +145,11 @@ public class MainWindowController implements Initializable {
             // Converts xQuery for Mongo Database to Mongo Query
             String mongoQuery = "";
             if(xQueryForMongo.length() > 0) {
-                // TODO: REMOVE HARD CODED MONGO QUERY, utiliser XPath une fois fait
-                if(mode == ComputeMode.ALL && (xQuery.equals(queries.get(0)) || xQuery.equals(queries.get(3)))) {
-                    mongoQuery = "db.EcoleMongoDB.find()";
-                }
-                else if(mode == ComputeMode.ALL && xQuery.equals(queries.get(2))) {
+                // TODO: MongoDB ne marche pas avec le where (donc la transformation est codé en durs pour l'exemple)
+                if(mode == ComputeMode.ALL && xQuery.equals(queries.get(2))) {
                     mongoQuery = "db.EcoleMongoDB.find({Nom: \"INSA de Rennes\"})";
                 }
                 else {
-                    // TODO: MongoDb ne marche pas
                     XPath mongoParser = new XPath(xQueryForMongo);
                     mongoQuery = mongoParser.XPath2().getMongodb().get();
                 }
